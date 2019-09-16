@@ -9,8 +9,8 @@ OBJS=grafo.o
 
 all: TP1
 
-TP1: $(OBJS) tp1_grafo.cpp
-	$(CC) $(LFLAGS) $(OBJS) $^ -o TP1
+TP1: tp1_grafo.cpp $(OBJS)
+	$(CC) $(LFLAGS) $(OBJS) $< -o TP1
 
 grafo.o: grafo.h grafo.cpp
 	$(CC) $(CFLAGS) grafo.cpp -o grafo.o
