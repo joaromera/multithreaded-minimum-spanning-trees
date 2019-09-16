@@ -20,7 +20,8 @@ typedef struct Eje {
     this->nodoDestino = nodoDestino;
     this->peso = peso;
   }
-  Eje():nodoDestino(0), peso(0) {}
+
+  Eje() : nodoDestino(0), peso(0) {}
 } Eje;
 
 class Grafo {
@@ -42,7 +43,9 @@ public:
   vector<Eje>::iterator vecinosBegin(int num);
   vector<Eje>::iterator vecinosEnd(int num);
   void insertarEje(int nodoA, int nodoB, int peso);
+
 private:
+
   void incrementarTotalEjes();
 };
 
