@@ -354,11 +354,13 @@ int main(int argc, char const * argv[]) {
 
     string nombre;
     nombre = string(argv[1]);
-    int threads = 1;
+
+    string algoritmo;
     if (argc > 2){
         algoritmo = string(argv[2]);
     }
 
+    int threads = 1;
     if (argc > 3){
         threads = atoi(argv[3]);
     }
