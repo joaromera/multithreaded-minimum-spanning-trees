@@ -251,7 +251,6 @@ void experimentacion(){
                 if(k == 0){
                     grafo = "arbol";
                     auto start = std::chrono::steady_clock::now();
-                    mstSecuencial(&g);
                     auto end = std::chrono::steady_clock::now();
 
                     std::cout << instancia << "," << n << "," << grafo << "," << 1 << ","
@@ -264,7 +263,6 @@ void experimentacion(){
                 if(k == 1){
                     grafo = "ralo";
                     auto start = std::chrono::steady_clock::now();
-                    mstSecuencial(&g);
                     auto end = std::chrono::steady_clock::now();
 
                     std::cout << instancia << "," << n << "," << grafo << "," << 1 << ","
@@ -277,7 +275,6 @@ void experimentacion(){
                 if(k == 2){
                     grafo = "completo";
                     auto start = std::chrono::steady_clock::now();
-                    mstSecuencial(&g);
                     auto end = std::chrono::steady_clock::now();
 
                     std::cout << instancia << "," << n << "," << grafo << "," << 1 << ","
