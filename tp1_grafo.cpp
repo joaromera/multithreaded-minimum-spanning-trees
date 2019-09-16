@@ -199,11 +199,16 @@ void mstParalelo(Grafo *g, int cantThreads) {
 
     // Se inicializan las estructuras globales
     // TO DO.
+
     // Se deben usar pthread_create y pthread_join.
+
     for (int i = 0; i < cantThreads; ++i) {
+        // Inicializa un thread corriendo `mstParaleloThread(g)`.
         pthread_create(&threads[i], NULL, mstParaleloThread, (void*) g);
     }
 
+    // Espera a que termine cada uno de los threads. En este caso el orden no
+    // importa.
     for (int i = 0; i < cantThreads; ++i) {
         pthread_join(threads[i], NULL);
     }
