@@ -29,10 +29,13 @@ struct FusionInfo{
     int weight;
 };
 
-struct Thread{
- // TO DO
+struct Thread {
+// TO DO
+// Estructura que debe contener los colores de los vértices (actual y vecinos).
+// Las distancias, el árbol, y la herramientas de sincronización necesarias
+// para evitar race conditions y deadlocks.
 
-// Estructura que debe contener los colores de los vértices (actual y vecinos). Las distancias, el árbol, y la herramientas de sincronización necesarias para evitar race conditions y deadlocks.
+
 
 };
 
@@ -55,20 +58,19 @@ bool imprimirResultado = true;
 
 //Retorna el nodo alcanzable a menor distancia
 int buscarNodo(int thread){
-  // TO DO
+    // TO DO
+    return 0;
 }
 
 
 // Se pinta el nodo de negro para indicar que fue colocado en el árbol
 void pintarNodo(int num, int thread){
    // TO DO
-
 }
 
 // Se pintan los vecinos de gris para marcar que son alcanzables desde el árbol (salvo los que ya son del árbol)
 void pintarVecinos(Grafo *g, int num, int thread){
    // TO DO
-
 }
 
 //Reinicia las estructuras de un thread.
@@ -80,6 +82,7 @@ void reiniciarThread(int thread, Grafo* g){
 // Iniciar un thread.
 int initThread(Grafo* g){
     // TO DO
+    return 0;
 }
 
 void procesarNodo( int nodo, int thread, Grafo* g ){
@@ -97,8 +100,7 @@ void procesarNodo( int nodo, int thread, Grafo* g ){
 
 // Trata de reservar el nodo que se pasa como parametro para el thread
 
-ThreadInfo tomarNodo(int nodo, int thread){
-  
+ThreadInfo tomarNodo(int nodo, int thread) {
    // TO DO
 }
 
@@ -172,30 +174,30 @@ void* mstParaleloThread(void *p){
 
              // Se procura reservar el nodo que se quiere tomar, indicando la apropiación en la estructura usada.
 
-                 ThreadInfo tomarNodo(nodoActual, thread);
+                 ThreadInfo thread_info = tomarNodo(nodoActual, thread);
 
 	     //Si se logra tomar, se procesa.
         
              //Si el nodo lo tiene otro thread, se tiene que fusionar
 
-                  requestFuse(.....);
+                //   requestFuse(.....);
     }
 }
 
 
 
-void mstParalelo(Grafo *g, int cantThreads){
+void mstParalelo(Grafo *g, int cantThreads) {
 
     //Verificar cantidad de threads para ejecutar el algoritmo
 
-    if(cantThreads < 1){
+    if (cantThreads < 1) {
         cerr << "El número de threads debe ser igual o mayor a 1" << endl;
     }
 
     //Si el numero de vertices del grafo es 0, imprimir el grafo vacio
 
-    if(g->numVertices == 0){
-        if(imprimirResultado){
+    if (g->numVertices == 0) {
+        if (imprimirResultado) {
             cout << endl << "********** RESULTADO *********** " << endl;
             Grafo().imprimirGrafo();
         }
@@ -209,6 +211,13 @@ void mstParalelo(Grafo *g, int cantThreads){
     // Se inicializan las estructuras globales
     // TO DO.
     // Se deben usar pthread_create y pthread_join.
+    for (int i = 0; i < cantThreads; ++i) {
+        pthread_create(&threads[i], NULL, mstParaleloThread, (void*) g);
+    }
+
+    for (int i = 0; i < cantThreads; ++i) {
+        pthread_join(threads[i], NULL);
+    }
 }
 
 //Reinicia la experimentación.
