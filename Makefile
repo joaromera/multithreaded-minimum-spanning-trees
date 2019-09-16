@@ -19,6 +19,17 @@ clean:
 	rm $(OBJS)
 	rm TP1
 
+# Usar esto para debugear vars de entorno en el makefile.
+.PHONY: print-makefile-vars
+print-makefile-vars:
+	@echo -e "CC           = $(CC)"
+	@echo -e "CPP_STANDARD = $(CPP_STANDARD)"
+	@echo -e "CFLAGS       = $(CFLAGS)"
+	@echo -e "LFLAGS       = $(LFLAGS)"
+	@echo -e "OBJS         = $(OBJS)"
+	@echo -e "input        = $(input)"
+	@echo -e "threads      = $(threads)"
+
 test: TP1
 	./TP1 $(input)
 
