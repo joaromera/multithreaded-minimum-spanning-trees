@@ -146,6 +146,8 @@ void* mstParaleloThread(void *p) {
     // Se obtiene el numero de thread y se inicializan sus estructuras
     int thread = initThread(g);
 
+    int nodoActual = -1;
+
     // Ciclo principal de cada thread
     while(true){
 
