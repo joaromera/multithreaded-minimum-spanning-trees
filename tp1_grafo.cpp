@@ -12,7 +12,6 @@
 
 using namespace std;
 
-
 // Estructura para los datos básicos de un thread.
 struct ThreadInfo {
     int thread; // Número de thread.
@@ -44,6 +43,7 @@ bool imprimirResultado = true;
 // Contener el estado global de la estructura de threads.
 
 // Para coordinar el número de cada thread durante la inizializacion de threads.
+atomic<int> thread_counter {0};
 
 // Para para coordinar el id de cada thread durante la inizializacion y reinicializacion de threads.
 
@@ -56,7 +56,6 @@ int buscarNodo(int thread) {
     // TO DO
     return 0;
 }
-
 
 // Se pinta el nodo de negro para indicar que fue colocado en el árbol
 void pintarNodo(int num, int thread) {
@@ -76,7 +75,8 @@ void reiniciarThread(int thread, Grafo* g) {
 // Iniciar un thread.
 int initThread(Grafo* g) {
     // TO DO
-    return 0;
+    int thread = thread_counter++;
+    return thread;
 }
 
 void procesarNodo(int nodo, int thread, Grafo* g ) {
@@ -91,7 +91,6 @@ void procesarNodo(int nodo, int thread, Grafo* g ) {
 
 }
 
-
 // Trata de reservar el nodo que se pasa como parametro para el thread
 ThreadInfo tomarNodo(int nodo, int thread) {
    // TO DO
@@ -102,8 +101,8 @@ void requestFuse(int thread, ThreadInfo other, int node) {
     // TO DO
 
     // Se deben evitar race conditions, en los siguietes casos:
-        // Un nodo hijo no puede estar en la cola de fusiones de otro nodo.
-        // Solo se pueden agregar a la cola si el padre no está siendo fusionado por otro thread. 
+    // Un nodo hijo no puede estar en la cola de fusiones de otro nodo.
+    // Solo se pueden agregar a la cola si el padre no está siendo fusionado por otro thread. 
 }
 
 // Realizar la fusión
@@ -138,7 +137,6 @@ void* mstParaleloThread(void *p) {
     Grafo* g = (Grafo*) p;
 
     // Se obtiene el numero de thread y se inicializan sus estructuras
-
     int thread = initThread(g);
 
     // Se selecciona un nodo al azar del grafo para empezar.
@@ -164,7 +162,6 @@ void* mstParaleloThread(void *p) {
         nodoActual = buscarNodo(thread);
 
         // Se procura reservar el nodo que se quiere tomar, indicando la apropiación en la estructura usada.
-
         ThreadInfo thread_info = tomarNodo(nodoActual, thread);
 
         // Si se logra tomar, se procesa.
@@ -176,21 +173,17 @@ void* mstParaleloThread(void *p) {
 }
 
 void mstParalelo(Grafo *g, int cantThreads) {
-
     // Verificar cantidad de threads para ejecutar el algoritmo
-
     if (cantThreads < 1) {
         cerr << "El número de threads debe ser igual o mayor a 1" << endl;
     }
 
     // Si el numero de vertices del grafo es 0, imprimir el grafo vacio
-
     if (g->numVertices == 0) {
         if (imprimirResultado) {
             cout << endl << "********** RESULTADO *********** " << endl;
             Grafo().imprimirGrafo();
         }
-
         return;
     }
 
@@ -212,7 +205,6 @@ void mstParalelo(Grafo *g, int cantThreads) {
 //Reinicia la experimentación.
 void resetExperimentacion() {
    // TO DO 
-
 }
 
 //Procedimiento para realizar las pruebas o test mínimo de la cátedra.
@@ -243,8 +235,8 @@ void experimentacion() {
                     return;
                 }
             }
-            for (int i = 0; i < 10; i++) {
 
+            for (int i = 0; i < 10; i++) {
                 if (k == 0) {
                     grafo = "arbol";
                     auto start = std::chrono::steady_clock::now();
@@ -358,5 +350,5 @@ int main(int argc, char const * argv[]) {
         return 1;
     }
 
-  return 0;
+    return 0;
 }
