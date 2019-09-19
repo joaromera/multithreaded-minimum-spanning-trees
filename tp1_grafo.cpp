@@ -10,6 +10,7 @@
 #include <pthread.h>
 #include <semaphore.h>
 #include <chrono>
+#include "lista_de_colores.h"
 
 using namespace std;
 
@@ -37,7 +38,7 @@ struct Thread {
     Grafo agm;
     vector<int> nodes;
     ThreadInfo info;
-    queue<FusionInfo> fusions;
+    // queue<FusionInfo> fusions;
 };
 
 // Imprimir el grafo resultado durante los experimentos
@@ -46,7 +47,6 @@ bool imprimirResultado = true;
 // Se sugieren usar variables (unas atómicas y otras no) para:
 
 // Contener el estado global de la estructura de threads.
-Thread threads_info[];
 
 // Para coordinar el número de cada thread durante la inizializacion de threads.
 atomic<int> thread_counter {0};
