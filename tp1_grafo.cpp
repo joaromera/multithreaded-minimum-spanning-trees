@@ -6,6 +6,7 @@
 #include <limits>
 #include <stack>
 #include <atomic>
+#include <queue>
 #include <pthread.h>
 #include <semaphore.h>
 #include <chrono>
@@ -29,10 +30,14 @@ struct FusionInfo {
 };
 
 struct Thread {
-// TO DO
-// Estructura que debe contener los colores de los vértices (actual y vecinos).
-// Las distancias, el árbol, y la herramientas de sincronización necesarias
-// para evitar race conditions y deadlocks.
+    // TO DO
+    // Estructura que debe contener los colores de los vértices (actual y vecinos).
+    // Las distancias, el árbol, y la herramientas de sincronización necesarias
+    // para evitar race conditions y deadlocks.
+    Grafo agm;
+    vector<int> nodes;
+    ThreadInfo info;
+    queue<FusionInfo> fusions;
 };
 
 // Imprimir el grafo resultado durante los experimentos
@@ -41,6 +46,7 @@ bool imprimirResultado = true;
 // Se sugieren usar variables (unas atómicas y otras no) para:
 
 // Contener el estado global de la estructura de threads.
+Thread threads_info[];
 
 // Para coordinar el número de cada thread durante la inizializacion de threads.
 atomic<int> thread_counter {0};
@@ -48,6 +54,7 @@ atomic<int> thread_counter {0};
 // Para para coordinar el id de cada thread durante la inizializacion y reinicializacion de threads.
 
 // Para coordinar las modificaciones de los colores.
+map<int, ThreadInfo> colored_nodes;
 
 // Para contener la estructura global que indica el estado actual de cada nodo. 
 
