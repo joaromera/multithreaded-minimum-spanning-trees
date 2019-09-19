@@ -146,11 +146,9 @@ void* mstParaleloThread(void *p) {
     // Se obtiene el numero de thread y se inicializan sus estructuras
     int thread = initThread(g);
 
-    // Se selecciona un nodo al azar del grafo para empezar.
-    int nodoActual = rand() % g->numVertices;
-
     // Ciclo principal de cada thread
     while(true){
+
         // Se termina la ejecución si el grafo ya no tiene vertices libres. Se imprime el resultado y se termina el thread
 
         // Si el thread está en la cola de fusiones de otro thread, lo notifica que puede fusionarse. 
