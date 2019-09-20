@@ -18,6 +18,9 @@ using namespace std;
 struct ThreadInfo {
     int thread; // Número de thread.
     int threadId; // ID del thread.
+
+    ThreadInfo(const int thread, const int threadId)
+        : thread(thread), threadId(threadId) {}
 };
 
 // Datos para agregar a la cola de fusiones de cada thread.
@@ -30,6 +33,13 @@ struct FusionInfo {
     int weight;
 };
 
+class GreaterEje {
+public:
+    bool operator()(const Eje &lhs, const Eje &rhs) const {
+        return lhs.peso > rhs.peso;
+    }
+};
+
 struct Thread {
     // TO DO
     // Estructura que debe contener los colores de los vértices (actual y vecinos).
@@ -39,7 +49,14 @@ struct Thread {
     vector<int> nodes;
     ThreadInfo info;
     // queue<FusionInfo> fusions;
+    std::priority_queue<Eje, vector<Eje>, GreaterEje> ejesVecinos;
+
+    // Constructor para el Thread
+    Thread(const int thread, const pthread_t tid)
+        : info(thread, tid), ejesVecinos() {};
+
 };
+
 
 // Imprimir el grafo resultado durante los experimentos
 bool imprimirResultado = true;
@@ -47,21 +64,43 @@ bool imprimirResultado = true;
 // Se sugieren usar variables (unas atómicas y otras no) para:
 
 // Contener el estado global de la estructura de threads.
+std::vector<Thread> threadData;
 
 // Para coordinar el número de cada thread durante la inizializacion de threads.
 atomic<int> thread_counter {0};
 
-// Para para coordinar el id de cada thread durante la inizializacion y reinicializacion de threads.
+// Para para coordinar el id de cada thread durante la inizializacion y
+// reinicializacion de threads.
+std::vector<pthread_t> pthread_id;
 
 // Para coordinar las modificaciones de los colores.
-map<int, ThreadInfo> colored_nodes;
+vector<ThreadInfo> colored_nodes;
 
 // Para contener la estructura global que indica el estado actual de cada nodo. 
 
-//Retorna el nodo alcanzable a menor distancia
+// Devuelve un nodo libre
+int buscarNodoLibre() {
+    
+}
+
+// Retorna el nodo alcanzable a menor distancia. Si el thread todavia no tiene
+// nodos, busca un nodo libre
 int buscarNodo(int thread) {
-    // TO DO
-    return 0;
+
+    if ( threadData[thread].ejesVecinos.empty() ) {
+
+        // El thread no conoce ningun nodo todavía. busca uno libre.
+        return buscarNodoLibre();
+
+    } else {
+
+        // Quita el nodo mas cercano del priority queue
+        Eje e = threadData[thread].ejesVecinos.top();
+        threadData[thread].ejesVecinos.pop();
+        return e.nodoDestino;
+
+    }
+
 }
 
 // Se pinta el nodo de negro para indicar que fue colocado en el árbol
@@ -75,14 +114,14 @@ void pintarVecinos(Grafo *g, int num, int thread) {
 }
 
 //Reinicia las estructuras de un thread.
-void reiniciarThread(int thread, Grafo* g) {
-    // TO DO
+void reiniciarThread(int thread) {
+    threadData[thread] = Thread(thread, pthread_id[thread]);
 }
 
 // Iniciar un thread.
-int initThread(Grafo* g) {
-    // TO DO
+int initThread() {
     int thread = thread_counter++;
+    reiniciarThread(thread);
     return thread;
 }
 
@@ -144,7 +183,7 @@ void* mstParaleloThread(void *p) {
     Grafo* g = (Grafo*) p;
 
     // Se obtiene el numero de thread y se inicializan sus estructuras
-    int thread = initThread(g);
+    int thread = initThread();
 
     int nodoActual = -1;
 
@@ -152,6 +191,9 @@ void* mstParaleloThread(void *p) {
     while(true){
 
         // Se termina la ejecución si el grafo ya no tiene vertices libres. Se imprime el resultado y se termina el thread
+        // PSEUDOCODIGO
+        // - Se fija en un contador global (atomico) cuantos nodos libres hay.
+        // - Si hay 0 => sale del loop.
 
         // Si el thread está en la cola de fusiones de otro thread, lo notifica que puede fusionarse. 
 
@@ -195,7 +237,7 @@ void mstParalelo(Grafo *g, int cantThreads) {
     }
 
     // Se crean los threads 
-    pthread_t threads[cantThreads];
+    pthread_id.resize(cantThreads);
 
     // Se inicializan las estructuras globales
     // TO DO.
@@ -204,13 +246,13 @@ void mstParalelo(Grafo *g, int cantThreads) {
 
     for (int i = 0; i < cantThreads; ++i) {
         // Inicializa un thread corriendo `mstParaleloThread(g)`.
-        pthread_create(&threads[i], NULL, mstParaleloThread, (void*) g);
+        pthread_create(&pthread_id[i], NULL, mstParaleloThread, (void*) g);
     }
 
     // Espera a que termine cada uno de los threads. En este caso el orden no
     // importa.
     for (int i = 0; i < cantThreads; ++i) {
-        pthread_join(threads[i], NULL);
+        pthread_join(pthread_id[i], NULL);
     }
 }
 
