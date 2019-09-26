@@ -202,12 +202,16 @@ void print_agm(const int thread, Grafo* g) {
     vector<int> &agm = threadData[thread].agm;
     Grafo out;
 
-    for (int i = 0; i < agm.size(); ++i) {
+    for (size_t i = 0; i < agm.size(); ++i) {
+        out.insertarNodo(i);
+    }
+
+    for (size_t i = 0; i < agm.size(); ++i) {
         int padre = agm[i];
         int hijo = i;
         // Toma la precaución de no añadir un eje que no va al grafo.
         if (padre == -1 or padre == hijo) continue;
-        int peso = g->listaDeAdyacencias[padre][hijo].peso;
+        int peso = g->getPeso(padre, hijo);
         out.insertarEje(padre, hijo, peso);
     }
 
@@ -304,6 +308,9 @@ void mstParalelo(Grafo *g, int cantThreads) {
 
     pthread_id.resize(cantThreads); // pthread_id de c/u thread.
     threadData.resize(cantThreads); // Data interna de c/u thread.
+    // Cada nodo empieza sin dueño
+    colored_nodes.resize(g->numVertices);
+    std::fill(colored_nodes.begin(), colored_nodes.end(), -1);
 
     // Inicializa cada uno de los threads.
     for (int i = 0; i < cantThreads; ++i) {

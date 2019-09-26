@@ -63,7 +63,6 @@ void Grafo::incrementarTotalEjes() {
 }
 
 void Grafo::imprimirGrafo() {
-  int size = listaDeAdyacencias.size();
   int peso = 0;
   for (auto v = listaDeAdyacencias.begin(); v != listaDeAdyacencias.end(); ++v) {
     for(const Eje &Eje : v->second) {
@@ -119,4 +118,16 @@ bool Grafo::esConexo() {
   }
 
   return nodosPintados == numVertices;
+}
+
+void Grafo::insertarNodo(const int nodo) {
+    numVertices++;
+    listaDeAdyacencias[nodo] = vector<Eje>();
+}
+
+int Grafo::getPeso(const int nodoA, const int nodoB) {
+    for (const Eje &e : listaDeAdyacencias[nodoA]) {
+        if (e.nodoDestino == nodoB) return e.peso;
+    }
+    return -1;
 }

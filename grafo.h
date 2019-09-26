@@ -44,6 +44,15 @@ public:
   vector<Eje>::iterator vecinosEnd(int num);
   void insertarEje(int nodoA, int nodoB, int peso);
 
+  /** Registra un nuevo nodo
+   *
+   * Fue necesario para poder crear un grafo sin vertices
+   */
+  void insertarNodo(int nodo);
+
+  /** Devuelve el peso de un eje */
+  int getPeso(const int nodoA, const int nodoB);
+
 private:
 
   void incrementarTotalEjes();
