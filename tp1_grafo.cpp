@@ -11,13 +11,18 @@
 #include <semaphore.h>
 #include <chrono>
 #include "lista_de_colores.h"
+#include "cola_prioridad.h"
 
 using namespace std;
+
+using id_thread = int32_t;
 
 // Estructura para los datos básicos de un thread.
 struct ThreadInfo {
     int thread; // Número de thread.
     int threadId; // ID del thread.
+
+    ThreadInfo() : thread(-1), threadId(-1) {}
 
     ThreadInfo(const int thread, const int threadId)
         : thread(thread), threadId(threadId) {}
@@ -33,29 +38,42 @@ struct FusionInfo {
     int weight;
 };
 
-class GreaterEje {
-public:
-    bool operator()(const Eje &lhs, const Eje &rhs) const {
-        return lhs.peso > rhs.peso;
-    }
-};
-
 struct Thread {
     // TO DO
     // Estructura que debe contener los colores de los vértices (actual y vecinos).
     // Las distancias, el árbol, y la herramientas de sincronización necesarias
     // para evitar race conditions y deadlocks.
-    Grafo agm;
-    vector<int> nodes;
-    ThreadInfo info;
-    // queue<FusionInfo> fusions;
-    std::priority_queue<Eje, vector<Eje>, GreaterEje> ejesVecinos;
+    vector<int> agm;
 
-    // Constructor para el Thread
-    Thread(const int thread, const pthread_t tid)
-        : info(thread, tid), ejesVecinos() {};
+    // Cola de prioridad para obtener el eje alcanzable mas corto.
+    ColaDePrioridad ejesVecinos;
+
+    // Constructor nulo. Cada thread se encarga de inicializar el estado
+    // correspondiente pasandole el grafo como parámetro.
+    Thread() {};
+
+    /** Reinicia el estado interno del thread.
+     *
+     * Se llama al inicializar o luego de fusionar. Esta función existe pues se
+     * necesita el constructor nulo para inicializar el vector<ThreadInfo>,
+     * pero se requiere tambien saber la cantidad de vertices en el grafo
+     */
+    void reset(Grafo *g) {
+
+        // Inicializa AGM vacio.
+        agm.resize(g->numVertices);
+        std::fill(agm.begin(), agm.end(), -1);
+
+        // Reinicia 
+        ejesVecinos.reset();
+
+    }
 
 };
+
+// -----------------------------------------------------------------------------
+// Variables globales
+// -----------------------------------------------------------------------------
 
 
 // Imprimir el grafo resultado durante los experimentos
@@ -74,30 +92,37 @@ atomic<int> thread_counter {0};
 std::vector<pthread_t> pthread_id;
 
 // Para coordinar las modificaciones de los colores.
-vector<ThreadInfo> colored_nodes;
+vector<id_thread> colored_nodes;
 
 // Para contener la estructura global que indica el estado actual de cada nodo. 
 
-// Devuelve un nodo libre
+// -----------------------------------------------------------------------------
+// Funciones
+// -----------------------------------------------------------------------------
+
+/** Devuelve id de un nodo sin colorear. Si estan todos coloreados devuelve -1
+ */
 int buscarNodoLibre() {
-    
+    for (size_t i = 0; i < colored_nodes.size(); ++i) {
+        if ( colored_nodes[i] == -1 ) return i;
+    }
+    return -1;
 }
 
 // Retorna el nodo alcanzable a menor distancia. Si el thread todavia no tiene
 // nodos, busca un nodo libre
-int buscarNodo(int thread) {
+std::pair<int, int> buscarNodo(int thread) {
 
     if ( threadData[thread].ejesVecinos.empty() ) {
 
         // El thread no conoce ningun nodo todavía. busca uno libre.
-        return buscarNodoLibre();
+        const int nodo = buscarNodoLibre();
+        return std::make_pair(nodo, nodo);
 
     } else {
 
         // Quita el nodo mas cercano del priority queue
-        Eje e = threadData[thread].ejesVecinos.top();
-        threadData[thread].ejesVecinos.pop();
-        return e.nodoDestino;
+        return threadData[thread].ejesVecinos.popEje();
 
     }
 
@@ -114,32 +139,32 @@ void pintarVecinos(Grafo *g, int num, int thread) {
 }
 
 //Reinicia las estructuras de un thread.
-void reiniciarThread(int thread) {
-    threadData[thread] = Thread(thread, pthread_id[thread]);
+void reiniciarThread(int thread, Grafo* g) {
+    threadData[thread].reset(g);
 }
 
 // Iniciar un thread.
-int initThread() {
+int initThread(Grafo *g) {
     int thread = thread_counter++;
-    reiniciarThread(thread);
+    reiniciarThread(thread, g);
     return thread;
 }
 
-void procesarNodo(int nodo, int thread, Grafo* g ) {
-
-    // TO DO. 
-
-    // Procurar pintar nodo. 
-
-    // Descubrir vecinos. 
-
-    // Iniciar la gestión de funsiones.
-
+// Trata de reservar el nodo que se pasa como parametro para el thread
+id_thread tomarNodo(int nodo, int thread) {
+    colored_nodes[nodo] = thread;
+    return thread; // FIXME cuando lo hagamos concurrente devuelve el dueño
 }
 
-// Trata de reservar el nodo que se pasa como parametro para el thread
-ThreadInfo tomarNodo(int nodo, int thread) {
-   // TO DO
+void add_ejes_alcanzables(const id_thread thread, Grafo* g, const int nodo) {
+
+    ColaDePrioridad &cola = threadData[thread].ejesVecinos;
+
+    std::for_each(g->vecinosBegin(nodo), g->vecinosEnd(nodo),
+        [&](const Eje &e){
+            cola.addEje(nodo, e.nodoDestino, e.peso);
+        });
+
 }
 
 // Procurar agregar el thread con mayor id a la cola de fusiones del thread con menor id
@@ -171,29 +196,39 @@ void fuse(int parent, Grafo *g) {
     //Se notifica al hijo que se termino la fusion
 }
 
-// Para buscar un nodo libre en el grafo.
-int buscarNodoLibre() {
-   // TO DO.
+/* Imprime el AGM formado por el thread */
+void print_agm(const int thread, Grafo* g) {
+
+    vector<int> &agm = threadData[thread].agm;
+    Grafo out;
+
+    for (int i = 0; i < agm.size(); ++i) {
+        int padre = agm[i];
+        int hijo = i;
+        // Toma la precaución de no añadir un eje que no va al grafo.
+        if (padre == -1 or padre == hijo) continue;
+        int peso = g->listaDeAdyacencias[padre][hijo].peso;
+        out.insertarEje(padre, hijo, peso);
+    }
+
+    out.imprimirGrafo();
+
 }
 
 
 // Gestión principal del thread. Contiene el ciclo que le permite a cada thread hacer sus funciones.
 void* mstParaleloThread(void *p) {
 
+    // Grafo global (esto es para cambiar el tipo de void* a Grafo*)
     Grafo* g = (Grafo*) p;
 
     // Se obtiene el numero de thread y se inicializan sus estructuras
-    int thread = initThread();
+    id_thread this_thread_id = initThread(g);
 
-    int nodoActual = -1;
+    std::pair<int, int> eje_actual(-1, -1);
 
     // Ciclo principal de cada thread
     while(true){
-
-        // Se termina la ejecución si el grafo ya no tiene vertices libres. Se imprime el resultado y se termina el thread
-        // PSEUDOCODIGO
-        // - Se fija en un contador global (atomico) cuantos nodos libres hay.
-        // - Si hay 0 => sale del loop.
 
         // Si el thread está en la cola de fusiones de otro thread, lo notifica que puede fusionarse. 
 
@@ -208,17 +243,46 @@ void* mstParaleloThread(void *p) {
         // Si tiene elementos en la cola de fusion, debe fusionarlos.
 
         // Se busca el nodo más cercano que no esté en el árbol, pero que sea alcanzable
-        nodoActual = buscarNodo(thread);
+        eje_actual = buscarNodo(this_thread_id);
 
-        // Se procura reservar el nodo que se quiere tomar, indicando la apropiación en la estructura usada.
-        ThreadInfo thread_info = tomarNodo(nodoActual, thread);
+        // Si ya no existen nodos libres sale del loop de expandirse.
+        if (eje_actual == std::make_pair(-1, -1)) break; // FIXME si hay tiempo hacer fc
+
+        // Si el nodo ya pertenece a este thread, saltea intentar tomarlo.
+        // FIXME esto va a causar race conditions cuando lo paralelicemos.
+        if (colored_nodes[eje_actual.second] == this_thread_id) continue;
+
+        // Se procura reservar el nodo que se quiere tomar, indicando la
+        // apropiación en la estructura usada. Devuelve dueño del nodo.
+        id_thread thread_info = tomarNodo(eje_actual.second, this_thread_id);
 
         // Si se logra tomar, se procesa.
+        if (thread_info == this_thread_id) {
 
-        // Si el nodo lo tiene otro thread, se tiene que fusionar
+            // Nodos padre e hijo (en la jerarquia del AGM) del eje a añadir.
+            int padre = eje_actual.first;
+            int hijo = eje_actual.second;
+
+            // Se añade nodo al AGM.
+            threadData[this_thread_id].agm[hijo] = padre;
+
+            // Se añaden a la cola de prioridad, los ejes alcanzables por el
+            // nuevo nodo.
+            add_ejes_alcanzables(this_thread_id, g, hijo);
+
+        } else {
+            // FIXME Si el nodo lo tiene otro thread, se tiene que fusionar
+        }
+
 
         // requestFuse(.....);
     }
+
+    // Al terminar el loop, se imprime el resultado y se termina el thread.
+    print_agm(this_thread_id, g);
+
+    return NULL;
+
 }
 
 void mstParalelo(Grafo *g, int cantThreads) {
@@ -236,14 +300,12 @@ void mstParalelo(Grafo *g, int cantThreads) {
         return;
     }
 
-    // Se crean los threads 
-    pthread_id.resize(cantThreads);
-
     // Se inicializan las estructuras globales
-    // TO DO.
 
-    // Se deben usar pthread_create y pthread_join.
+    pthread_id.resize(cantThreads); // pthread_id de c/u thread.
+    threadData.resize(cantThreads); // Data interna de c/u thread.
 
+    // Inicializa cada uno de los threads.
     for (int i = 0; i < cantThreads; ++i) {
         // Inicializa un thread corriendo `mstParaleloThread(g)`.
         pthread_create(&pthread_id[i], NULL, mstParaleloThread, (void*) g);
