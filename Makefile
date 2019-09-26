@@ -2,22 +2,22 @@
 
 CC=g++
 CPP_STANDARD=c++11
-CFLAGS=-c -pthread -std=$(CPP_STANDARD)
-LFLAGS=-pthread -std=$(CPP_STANDARD)
+CFLAGS=-c -pthread -std=$(CPP_STANDARD) -ggdb
+LFLAGS=-pthread -std=$(CPP_STANDARD) -ggdb
 
-OBJS=grafo.o
+OBJS=grafo.o cola_prioridad.o
 
 all: TP1
 
-TP1: tp1_grafo.cpp $(OBJS)
-	$(CC) $(LFLAGS) $(OBJS) $< -o TP1
+%.o: %.cpp %.h
+	$(CC) $(CFLAGS) -c -o $@ $<
 
-grafo.o: grafo.h grafo.cpp
-	$(CC) $(CFLAGS) grafo.cpp -o grafo.o
+TP1: tp1_grafo.cpp $(OBJS)
+	$(CC) $(LFLAGS) $(OBJS) -o TP1 $<
 
 clean:
-	rm $(OBJS)
-	rm TP1
+	rm -f $(OBJS)
+	rm -f TP1
 
 # Usar esto para debugear vars de entorno en el makefile.
 .PHONY: print-makefile-vars
