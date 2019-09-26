@@ -31,3 +31,6 @@
 *.out
 *.app
 TP1
+
+# Debugger
+.gdb_history
