@@ -12,6 +12,7 @@
 #include <chrono>
 #include "lista_de_colores.h"
 #include "cola_prioridad.h"
+#include "colores.h"
 
 using namespace std;
 
@@ -93,6 +94,9 @@ std::vector<pthread_t> pthread_id;
 
 // Para coordinar las modificaciones de los colores.
 vector<id_thread> colored_nodes;
+
+// Estructura atomica que registra los colores de los nodos.
+Colores colores;
 
 // Para contener la estructura global que indica el estado actual de cada nodo. 
 
@@ -311,6 +315,8 @@ void mstParalelo(Grafo *g, int cantThreads) {
     // Cada nodo empieza sin dueño
     colored_nodes.resize(g->numVertices);
     std::fill(colored_nodes.begin(), colored_nodes.end(), -1);
+    colores.reset(g->numVertices);
+
 
     // Inicializa cada uno de los threads.
     for (int i = 0; i < cantThreads; ++i) {

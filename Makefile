@@ -5,7 +5,7 @@ CPP_STANDARD=c++11
 CFLAGS=-c -pthread -std=$(CPP_STANDARD) -ggdb
 LFLAGS=-pthread -std=$(CPP_STANDARD) -ggdb
 
-OBJS=grafo.o cola_prioridad.o
+OBJS=grafo.o cola_prioridad.o colores.o
 
 all: TP1
 
