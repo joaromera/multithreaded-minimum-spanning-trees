@@ -37,6 +37,11 @@ public:
      */
     int capturarNodo(const int nodoID, const int threadID);
 
+    /** Devuelve id del thread dueño de un nodo. Devuelve -1 si el nodo no
+     * tiene dueño.
+     */
+    bool esDueno(const int nodoID, const int threadID);
+
     /** Devuelve un nodo sin dueño al momento de ejecutar esta función.
      *
      * El propietario del nodo puede ser distinto al momento de ejecutar

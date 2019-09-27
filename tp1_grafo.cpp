@@ -248,8 +248,7 @@ void* mstParaleloThread(void *p) {
         if (eje_actual == std::make_pair(-1, -1)) break; // FIXME si hay tiempo hacer fc
 
         // Si el nodo ya pertenece a este thread, saltea intentar tomarlo.
-        // FIXME esto va a causar race conditions cuando lo paralelicemos.
-        if (colored_nodes[eje_actual.second] == this_thread_id) continue;
+        if (colores.esDueno(eje_actual.second, this_thread_id)) continue;
 
         // Intenta capturar el nodo buscado. El valor deuvelto es el dueño del
         // nodo:

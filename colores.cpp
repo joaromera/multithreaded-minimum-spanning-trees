@@ -44,3 +44,13 @@ int Colores::buscarNodoLibre() const {
     }
     return -1;
 }
+
+bool Colores::esDueno(const int nodoID, const int threadID) {
+    int dueno;
+
+    pthread_mutex_lock(&_locks[nodoID]);
+        dueno = _colores[nodoID];
+    pthread_mutex_unlock(&_locks[nodoID]);
+
+    return dueno == threadID;
+}
