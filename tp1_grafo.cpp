@@ -104,15 +104,6 @@ Colores colores;
 // Funciones
 // -----------------------------------------------------------------------------
 
-/** Devuelve id de un nodo sin colorear. Si estan todos coloreados devuelve -1
- */
-int buscarNodoLibre() {
-    for (size_t i = 0; i < colored_nodes.size(); ++i) {
-        if ( colored_nodes[i] == -1 ) return i;
-    }
-    return -1;
-}
-
 // Retorna el nodo alcanzable a menor distancia. Si el thread todavia no tiene
 // nodos, busca un nodo libre
 std::pair<int, int> buscarNodo(int thread) {
@@ -120,7 +111,7 @@ std::pair<int, int> buscarNodo(int thread) {
     if ( threadData[thread].ejesVecinos.empty() ) {
 
         // El thread no conoce ningun nodo todavía. busca uno libre.
-        const int nodo = buscarNodoLibre();
+        const int nodo = colores.buscarNodoLibre();
         return std::make_pair(nodo, nodo);
 
     } else {

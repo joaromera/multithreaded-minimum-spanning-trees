@@ -34,3 +34,13 @@ int Colores::capturarNodo(const int nodoID, const int threadID) {
 
     return ans;
 }
+
+int Colores::buscarNodoLibre() const {
+    // No es necesario bloquear pues un nodo no puede pasar a no tener dueño.
+    // Tampoco existe una garantía fuerte que el nodo devuelto por esta funcion
+    // carezca de dueño al momento de intentar capturarlo  ¯\_(ツ)_/¯
+    for (size_t i = 0; i < _colores.size(); ++i) {
+        if ( _colores[i] == -1 ) return i;
+    }
+    return -1;
+}

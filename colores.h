@@ -26,4 +26,11 @@ public:
      */
     int capturarNodo(const int nodoID, const int threadID);
 
+    /** Devuelve un nodo sin dueño al momento de ejecutar esta función.
+     *
+     * El propietario del nodo puede ser distinto al momento de ejecutar
+     * `capturarNodo`.
+     */
+    int buscarNodoLibre() const;
+
 };
