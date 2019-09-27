@@ -92,9 +92,6 @@ atomic<int> thread_counter {0};
 // reinicializacion de threads.
 std::vector<pthread_t> pthread_id;
 
-// Para coordinar las modificaciones de los colores.
-vector<id_thread> colored_nodes;
-
 // Estructura atomica que registra los colores de los nodos.
 Colores colores;
 
@@ -145,11 +142,6 @@ int initThread(Grafo *g) {
     return thread;
 }
 
-// Trata de reservar el nodo que se pasa como parametro para el thread
-id_thread tomarNodo(int nodo, int thread) {
-    colored_nodes[nodo] = thread;
-    return thread; // FIXME cuando lo hagamos concurrente devuelve el dueño
-}
 
 void add_ejes_alcanzables(const id_thread thread, Grafo* g, const int nodo) {
 
@@ -306,8 +298,6 @@ void mstParalelo(Grafo *g, int cantThreads) {
     pthread_id.resize(cantThreads); // pthread_id de c/u thread.
     threadData.resize(cantThreads); // Data interna de c/u thread.
     // Cada nodo empieza sin dueño
-    colored_nodes.resize(g->numVertices);
-    std::fill(colored_nodes.begin(), colored_nodes.end(), -1);
     colores.reset(g->numVertices);
 
 
