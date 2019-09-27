@@ -251,9 +251,12 @@ void* mstParaleloThread(void *p) {
         // FIXME esto va a causar race conditions cuando lo paralelicemos.
         if (colored_nodes[eje_actual.second] == this_thread_id) continue;
 
-        // Se procura reservar el nodo que se quiere tomar, indicando la
-        // apropiación en la estructura usada. Devuelve dueño del nodo.
-        id_thread thread_info = tomarNodo(eje_actual.second, this_thread_id);
+        // Intenta capturar el nodo buscado. El valor deuvelto es el dueño del
+        // nodo:
+        // - Si se capturó con exito, es el mismo ID que el de este thread.
+        // - Caso contrario será el ID del thread con el que debe fusionarse.
+        id_thread thread_info = colores.capturarNodo(eje_actual.second,
+                                                     this_thread_id);
 
         // Si se logra tomar, se procesa.
         if (thread_info == this_thread_id) {
