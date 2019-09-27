@@ -5,6 +5,17 @@
 
 using namespace std;
 
+/**
+ * Diccionario de dueños de nodos. Esta es una estructura auxiliar al algoritmo
+ * `mstParalelo` que permite manejar el "ownership" de los nodos por los
+ * threads. Es una estructura compartida que todo thread puede acceder
+ * concurrentemente.
+ *
+ * Un nodo puede cambiar de dueño (color) en dos situaciones:
+ * - Puede ser capturado por un thread si previamente no tenía color asignado.
+ * - Todos los nodos de un thread pasan a ser propiedad de otro thread luego de
+ *   resolver un proceso de fusión.
+ */
 class Colores {
 
 private:
