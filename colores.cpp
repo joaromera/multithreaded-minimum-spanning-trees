@@ -35,14 +35,19 @@ int Colores::capturarNodo(const int nodoID, const int threadID) {
     return ans;
 }
 
-int Colores::buscarNodoLibre() const {
-    // No es necesario bloquear pues un nodo no puede pasar a no tener dueño.
-    // Tampoco existe una garantía fuerte que el nodo devuelto por esta funcion
-    // carezca de dueño al momento de intentar capturarlo  ¯\_(ツ)_/¯
-    for (size_t i = 0; i < _colores.size(); ++i) {
-        if ( _colores[i] == -1 ) return i;
+int Colores::buscarNodoLibre(const int threadID) {
+    bool encontrado = false;
+    int ans = -1;
+    for (size_t i = 0; ( i < _colores.size() ) && ( ! encontrado ); ++i) {
+        pthread_mutex_lock(&_locks[i]);
+            if ( _colores[i] == -1 ) {
+                _colores[i] = threadID;
+                ans = i;
+                encontrado = true;
+            }
+        pthread_mutex_unlock(&_locks[i]);
     }
-    return -1;
+    return ans;
 }
 
 bool Colores::esDueno(const int nodoID, const int threadID) {

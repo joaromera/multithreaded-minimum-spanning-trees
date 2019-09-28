@@ -108,13 +108,17 @@ std::pair<int, int> buscarNodo(int thread) {
     if ( threadData[thread].ejesVecinos.empty() ) {
 
         // El thread no conoce ningun nodo todavía. busca uno libre.
-        const int nodo = colores.buscarNodoLibre();
+        const int nodo = colores.buscarNodoLibre(thread);
         return std::make_pair(nodo, nodo);
 
     } else {
 
         // Quita el nodo mas cercano del priority queue
-        return threadData[thread].ejesVecinos.popEje();
+        while ( ! threadData[thread].ejesVecinos.empty() ) {
+            std::pair<int, int> e = threadData[thread].ejesVecinos.popEje();
+            if (! colores.esDueno(e.second, thread)) return e;
+        }
+        return std::make_pair(-1, -1);
 
     }
 
@@ -233,14 +237,13 @@ void* mstParaleloThread(void *p) {
 
         // Si tiene elementos en la cola de fusion, debe fusionarlos.
 
-        // Se busca el nodo más cercano que no esté en el árbol, pero que sea alcanzable
+        // Se busca el nodo más cercano que no esté en el árbol, pero que sea
+        // alcanzable
         eje_actual = buscarNodo(this_thread_id);
 
         // Si ya no existen nodos libres sale del loop de expandirse.
         if (eje_actual == std::make_pair(-1, -1)) break; // FIXME si hay tiempo hacer fc
 
-        // Si el nodo ya pertenece a este thread, saltea intentar tomarlo.
-        if (colores.esDueno(eje_actual.second, this_thread_id)) continue;
 
         // Intenta capturar el nodo buscado. El valor deuvelto es el dueño del
         // nodo:
