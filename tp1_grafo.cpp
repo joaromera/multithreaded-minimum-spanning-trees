@@ -101,27 +101,36 @@ Colores colores;
 // Funciones
 // -----------------------------------------------------------------------------
 
+enum StatusBuscarNodo { Ok, AgmCompleto, NoHayNodosDisponibles };
+
 // Retorna el nodo alcanzable a menor distancia. Si el thread todavia no tiene
 // nodos, busca un nodo libre
-std::pair<int, int> buscarNodo(int thread) {
+StatusBuscarNodo buscarNodo(int thread, std::pair<int, int> &out) {
 
     if ( threadData[thread].ejesVecinos.empty() ) {
 
         // El thread no conoce ningun nodo todavía. busca uno libre.
         const int nodo = colores.buscarNodoLibre(thread);
-        return std::make_pair(nodo, nodo);
+        if (nodo != -1) {
+            out = std::make_pair(nodo, nodo);
+            return Ok;
+        } else {
+            return NoHayNodosDisponibles;
+        }
 
     } else {
 
         // Quita el nodo mas cercano del priority queue
         while ( ! threadData[thread].ejesVecinos.empty() ) {
             std::pair<int, int> e = threadData[thread].ejesVecinos.popEje();
-            if (! colores.esDueno(e.second, thread)) return e;
+            if (! colores.esDueno(e.second, thread)) {
+                out = e;
+                return Ok;
+            }
         }
-        return std::make_pair(-1, -1);
 
+        return AgmCompleto;
     }
-
 }
 
 // Se pinta el nodo de negro para indicar que fue colocado en el árbol
@@ -239,11 +248,9 @@ void* mstParaleloThread(void *p) {
 
         // Se busca el nodo más cercano que no esté en el árbol, pero que sea
         // alcanzable
-        eje_actual = buscarNodo(this_thread_id);
-
-        // Si ya no existen nodos libres sale del loop de expandirse.
-        if (eje_actual == std::make_pair(-1, -1)) break; // FIXME si hay tiempo hacer fc
-
+        StatusBuscarNodo status = buscarNodo(this_thread_id, eje_actual);
+        if (status == NoHayNodosDisponibles) return NULL;
+        if (status == AgmCompleto) break; // Rompe el loop. Imprime
 
         // Intenta capturar el nodo buscado. El valor deuvelto es el dueño del
         // nodo:
