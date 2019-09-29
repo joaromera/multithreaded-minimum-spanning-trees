@@ -170,7 +170,7 @@ void add_ejes_alcanzables(const id_thread thread, Grafo* g, const int nodo) {
 // Realizar la fusión
 void fuse(const int thread1, const int thread2) {
 
-    log(-1, "Iniciando fusion.");
+    log("Iniciando fusion.");
 
     //Se determina el thread que tengo que fusionar
     if (thread2 < thread1) {
@@ -180,27 +180,27 @@ void fuse(const int thread1, const int thread2) {
 
     // Colorea todos los nodos de thread2 como nodos de thread1
     colores.fusionarThreads(thread1, thread2);
-    log(-1, "fusionando colores ok.");
+    log("fusionando colores ok.");
 
     // Pasa todos los vertices de thread2 al agm de thread1
     Grafo &agmThread1 = threadData[thread1].agm;
     Grafo &agmThread2 = threadData[thread2].agm;
-    log(-1, "iniciando mv");
+    log("iniciando mv");
     for ( int i = 0; i < agmThread2.numVertices; ++i ) {
-        log(-1, "moviendo");
+        log("moviendo");
         vector<Eje> &v = agmThread2.listaDeAdyacencias[i];
         move(v.begin(), v.end(), agmThread1.listaDeAdyacencias[i].end());
     }
     agmThread1.numEjes += agmThread2.numEjes;
-    log(-1, "fusionando agms ok");
+    log("fusionando agms ok");
 
     // Pasa todos los ejes de la cola de prioridad a este thread
     threadData[thread1].ejesVecinos.fusionar(threadData[thread2].ejesVecinos);
-    log(-1, "fusionando colasDePrioridad ok");
+    log("fusionando colasDePrioridad ok");
 
     // reinicia thread2
     threadData[thread2].reset(agmThread1.numVertices);
-    log(-1, "reset ok");
+    log("reset ok");
 
 }
 
@@ -215,7 +215,7 @@ void* mstParaleloThread(void *p) {
 
     std::pair<int, int> eje_actual(-1, -1);
 
-    log(this_thread_id, "Comienza");
+    log("Comienza thread %lu", this_thread_id);
 
     // Ciclo principal de cada thread
     while(true){
@@ -224,14 +224,14 @@ void* mstParaleloThread(void *p) {
         // notifica que puede fusionarse.
 
         while ( threadData[this_thread_id].colaDeFusiones.notEmpty() ) {
-            log(this_thread_id, "Atendiendo un pedido de fusion");
+            log("Atendiendo un pedido de fusion");
 
             threadData[this_thread_id].colaDeFusiones.acknowledgeFusion();
-            log(this_thread_id, "Esperando a que fusion termine");
+            log("Esperando a que fusion termine");
 
             // Quedo bloqueado hasta que el otro thread termine de fusionarme
             pthread_mutex_lock(&threadData[this_thread_id].fusionReady);
-            log(this_thread_id, "terminaron de fusionarme.");
+            log("terminaron de fusionarme.");
         }
 
         // Se busca el nodo más cercano que no esté en el árbol, pero que sea
@@ -240,7 +240,7 @@ void* mstParaleloThread(void *p) {
         if (status == NoHayNodosDisponibles) return NULL;
         if (status == AgmCompleto) break; // Rompe el loop. Imprime
 
-        log(this_thread_id, "obtuve prox nodo");
+        log("obtuve prox eje, (%d, %d)", eje_actual.first, eje_actual.second);
 
         // Intenta capturar el nodo buscado. El valor deuvelto es el dueño del
         // nodo:
@@ -251,7 +251,7 @@ void* mstParaleloThread(void *p) {
 
         // Si se logra tomar, se procesa.
         if (thread_info == this_thread_id) {
-            log(this_thread_id, "Nodo fue capturado. Agregando a mi AGM");
+            log("Nodo fue capturado. Agregando a mi AGM");
 
             // Nodos padre e hijo (en la jerarquia del AGM) del eje a añadir.
             int padre = eje_actual.first;
@@ -269,7 +269,7 @@ void* mstParaleloThread(void *p) {
 
         } else {
 
-            log(this_thread_id, "Fusionandome con otro thread");
+            log("Fusionandome con otro thread");
 
             int nodoID = eje_actual.second;
 
@@ -289,7 +289,7 @@ void* mstParaleloThread(void *p) {
 
             }
 
-            log(this_thread_id, "Listo para fusionarme");
+            log("Listo para fusionarme");
 
             // Hace la fusion
 
@@ -299,23 +299,23 @@ void* mstParaleloThread(void *p) {
             int hijo = eje_actual.second;
             int peso = g->getPeso(padre, hijo);
             threadData[this_thread_id].agm.insertarEje(padre, hijo, peso);
-            log(this_thread_id, "inserté el eje");
+            log("inserté el eje");
 
             // llama a fuse()
             fuse(this_thread_id, thread_info);
-            log(this_thread_id, "Fuse OK");
+            log("Fuse OK");
 
             // Desbloqueo el otro thread.
             pthread_mutex_unlock(&threadData[this_thread_id].fusionReady);
-            log(this_thread_id, "Fusión ok");
+            log("Fusión ok");
 
-            log(this_thread_id, "Fusion terminada");
+            log("Fusion terminada");
 
         }
 
     }
 
-    log(this_thread_id, "AGM listo!");
+    log("AGM listo!");
 
     // Al terminar el loop, se imprime el resultado y se termina el thread.
     threadData[this_thread_id].agm.imprimirGrafo();
@@ -478,7 +478,7 @@ void experimentacion() {
 
 int main(int argc, char const * argv[]) {
 
-    init_log();
+    log_init();
 
     if (argc <= 1) {
         cerr << "Introduzca el nombre del archivo o el parámetro \"-e\" para hacer varias pruebas " << endl;
