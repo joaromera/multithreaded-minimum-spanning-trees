@@ -59,3 +59,20 @@ bool Colores::esDueno(const int nodoID, const int threadID) {
 
     return dueno == threadID;
 }
+
+void Colores::fusionarThreads(const int threadID1, const int threadID2) {
+
+    if (threadID2 < threadID1) {
+        fusionarThreads(threadID2, threadID1);
+        return;
+    }
+
+    for (size_t i = 0; i < _colores.size(); ++i) {
+        pthread_mutex_lock(&_locks[i]);
+        if ( _colores[i] == threadID2 ) {
+            _colores[i] = threadID1;
+        }
+        pthread_mutex_unlock(&_locks[i]);
+    }
+
+}

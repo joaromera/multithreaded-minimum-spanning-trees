@@ -48,4 +48,8 @@ public:
     /** Se adueña de un nodo libre. De no existir devuelve -1. */
     int buscarNodoLibre(const int threadID);
 
+    /** Pasa todos los nodos del thread con id mas grande al thread con id mas
+     * chico. */
+    void fusionarThreads(const int threadID1, const int threadID2);
+
 };

@@ -66,4 +66,8 @@ public:
     /** Reinicia el estado de la cola de prioridad */
     void reset();
 
+    /** Quita todos los elementos de la otra cola de prioridad y los inserta en
+     * esta cola de prioridad. La otra cola de prioridad queda vacia. */
+    void fusionar(ColaDePrioridad cola);
+
 };

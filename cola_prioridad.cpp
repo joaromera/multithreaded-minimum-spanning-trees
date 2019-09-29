@@ -26,3 +26,11 @@ void ColaDePrioridad::reset() {
     // Asigna una cola vacia reiniciando el estado de la cola de prioridad.
     ejesVecinos = std::priority_queue<_eje_t, vector<_eje_t>, GreaterEje>();
 }
+
+void ColaDePrioridad::fusionar(ColaDePrioridad cola) {
+    while (! cola.empty() ) {
+        _eje_t e = cola.ejesVecinos.top();
+        cola.ejesVecinos.pop();
+        this->addEje(e.nodo_conocido, e.nodo_alcanzable, e.peso);
+    }
+}

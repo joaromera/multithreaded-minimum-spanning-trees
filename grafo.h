@@ -37,6 +37,11 @@ public:
     numEjes = 0;
   }
 
+  Grafo(const Grafo &other)
+      : numVertices(other.numVertices),
+        numEjes(other.numEjes),
+        listaDeAdyacencias(other.listaDeAdyacencias) {}
+
   int inicializar(string nombreArchivo);
   void imprimirGrafo();
   bool esConexo();

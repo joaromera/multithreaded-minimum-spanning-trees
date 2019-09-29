@@ -9,12 +9,14 @@ readonly DIR_CASOS_TEST="test/correctitud"
 correr() {
     local readonly NOMBRE_TEST="$1"
     local readonly N_THREADS="$2"
-    "$PROGRAM" "${DIR_CASOS_TEST}/${NOMBRE_TEST}.txt" sarasa "$N_THREADS"
+    "$PROGRAM" "${DIR_CASOS_TEST}/${NOMBRE_TEST}.txt" sarasa "$N_THREADS" \
+        | grep -v '^\s'
 }
 
 get_correct_answer() {
     local readonly NOMBRE_TEST="$1"
-    cat "${DIR_CASOS_TEST}/${NOMBRE_TEST}.ans"
+    cat "${DIR_CASOS_TEST}/${NOMBRE_TEST}.ans" \
+        | grep -v '^\s'
 }
 
 correr_diff() {
