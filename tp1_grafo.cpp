@@ -118,8 +118,8 @@ enum StatusBuscarNodo { Ok, AgmCompleto, NoHayNodosDisponibles };
 StatusBuscarNodo buscarNodo(int thread, Eje &out) {
 
     if ( threadData[thread].ejesVecinos.empty() ) {
+        log("buscarNodo: buscando el primer nodo del trhead");
 
-        // El thread no conoce ningun nodo todavía. busca uno libre.
         const int nodo = colores.buscarNodoLibre(thread);
         if (nodo != -1) {
             out = Eje(nodo, nodo, 0);
@@ -130,13 +130,17 @@ StatusBuscarNodo buscarNodo(int thread, Eje &out) {
 
     } else {
 
-        // Quita el nodo mas cercano del priority queue
+        log("buscarNodo: Va a devolver el nodo alcanzable mas cercano.");
         while ( ! threadData[thread].ejesVecinos.empty() ) {
             Eje e = threadData[thread].ejesVecinos.top();
             if (! colores.esDueno(e.nodoDestino, thread)) {
                 out = e;
                 return Ok;
             }
+
+            // Quita este eje de los ejesVecinos
+            threadData[thread].ejesVecinos.pop();
+
         }
 
         return AgmCompleto;
@@ -220,6 +224,8 @@ void* mstParaleloThread(void *p) {
     // Ciclo principal de cada thread
     while(true){
 
+        log("Vuelve inicio del while");
+
         // Si otro thread esta en la cola de fusiones de este thread lo
         // notifica que puede fusionarse.
 
@@ -234,11 +240,19 @@ void* mstParaleloThread(void *p) {
             log("terminaron de fusionarme.");
         }
 
+        log("Buscando nodo mas cercano");
+
         // Se busca el nodo más cercano que no esté en el árbol, pero que sea
         // alcanzable
         StatusBuscarNodo status = buscarNodo(this_thread_id, eje_actual);
-        if (status == NoHayNodosDisponibles) return NULL;
-        if (status == AgmCompleto) break; // Rompe el loop. Imprime
+        if (status == NoHayNodosDisponibles) {
+            log("Terminando proceso. ya no hay nodos disponibles");
+            return NULL;
+        }
+        if (status == AgmCompleto) {
+            log("AGM completo!");
+            break;
+        };
 
         log("obtuve prox eje, (%d, %d)",
             eje_actual.nodoOrigen,
