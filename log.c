@@ -30,7 +30,7 @@ void log(const char * format, ...) {
         va_list vargs; // Estos son los args que vienen en el `...`
         va_start(vargs, format);
         _set_thread_color(tid);
-        fprintf(stderr, "%lu: ", tid);
+        fprintf(stderr, "%lx: ", tid);
         _reset_color();
         vfprintf(stderr, format, vargs);
         fprintf(stderr, ".\n");
