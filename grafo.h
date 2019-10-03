@@ -13,15 +13,17 @@
 using namespace std;
 
 typedef struct Eje {
-  int nodoDestino;
-  int peso;
+    int nodoOrigen;
+    int nodoDestino;
+    int peso;
 
-  Eje(int nodoDestino, int peso) {
-    this->nodoDestino = nodoDestino;
-    this->peso = peso;
-  }
+    Eje(int nodoOrigen, int nodoDestino, int peso) :
+        nodoOrigen(nodoOrigen),
+        nodoDestino(nodoDestino),
+        peso(peso) {}
 
-  Eje() : nodoDestino(0), peso(0) {}
+    Eje() : nodoOrigen(0), nodoDestino(0), peso(0) {}
+
 } Eje;
 
 class Grafo {
