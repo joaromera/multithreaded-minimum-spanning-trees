@@ -115,14 +115,14 @@ enum StatusBuscarNodo { Ok, AgmCompleto, NoHayNodosDisponibles };
 
 // Retorna el nodo alcanzable a menor distancia. Si el thread todavia no tiene
 // nodos, busca un nodo libre
-StatusBuscarNodo buscarNodo(int thread, std::pair<int, int> &out) {
+StatusBuscarNodo buscarNodo(int thread, Eje &out) {
 
     if ( threadData[thread].ejesVecinos.empty() ) {
 
         // El thread no conoce ningun nodo todavía. busca uno libre.
         const int nodo = colores.buscarNodoLibre(thread);
         if (nodo != -1) {
-            out = std::make_pair(nodo, nodo);
+            out = Eje(nodo, nodo, 0);
             return Ok;
         } else {
             return NoHayNodosDisponibles;
@@ -132,8 +132,8 @@ StatusBuscarNodo buscarNodo(int thread, std::pair<int, int> &out) {
 
         // Quita el nodo mas cercano del priority queue
         while ( ! threadData[thread].ejesVecinos.empty() ) {
-            std::pair<int, int> e = threadData[thread].ejesVecinos.popEje();
-            if (! colores.esDueno(e.second, thread)) {
+            Eje e = threadData[thread].ejesVecinos.top();
+            if (! colores.esDueno(e.nodoDestino, thread)) {
                 out = e;
                 return Ok;
             }
@@ -162,7 +162,7 @@ void add_ejes_alcanzables(const id_thread thread, Grafo* g, const int nodo) {
 
     std::for_each(g->vecinosBegin(nodo), g->vecinosEnd(nodo),
         [&](const Eje &e){
-            cola.addEje(nodo, e.nodoDestino, e.peso);
+            cola.addEje(e);
         });
 
 }
@@ -213,7 +213,7 @@ void* mstParaleloThread(void *p) {
     // Se obtiene el numero de thread y se inicializan sus estructuras
     id_thread this_thread_id = initThread(g);
 
-    std::pair<int, int> eje_actual(-1, -1);
+    Eje eje_actual;
 
     log("Comienza thread %lu", this_thread_id);
 
@@ -240,13 +240,15 @@ void* mstParaleloThread(void *p) {
         if (status == NoHayNodosDisponibles) return NULL;
         if (status == AgmCompleto) break; // Rompe el loop. Imprime
 
-        log("obtuve prox eje, (%d, %d)", eje_actual.first, eje_actual.second);
+        log("obtuve prox eje, (%d, %d)",
+            eje_actual.nodoOrigen,
+            eje_actual.nodoDestino);
 
         // Intenta capturar el nodo buscado. El valor deuvelto es el dueño del
         // nodo:
         // - Si se capturó con exito, es el mismo ID que el de este thread.
         // - Caso contrario será el ID del thread con el que debe fusionarse.
-        id_thread thread_info = colores.capturarNodo(eje_actual.second,
+        id_thread thread_info = colores.capturarNodo(eje_actual.nodoDestino,
                                                      this_thread_id);
 
         // Si se logra tomar, se procesa.
@@ -254,13 +256,12 @@ void* mstParaleloThread(void *p) {
             log("Nodo fue capturado. Agregando a mi AGM");
 
             // Nodos padre e hijo (en la jerarquia del AGM) del eje a añadir.
-            int padre = eje_actual.first;
-            int hijo = eje_actual.second;
-            int peso = g->getPeso(padre, hijo);
+            int padre = eje_actual.nodoOrigen;
+            int hijo = eje_actual.nodoDestino;
 
             // Se añade el eje al AGM
             if (padre != hijo) {
-                threadData[this_thread_id].agm.insertarEje(padre, hijo, peso);
+                threadData[this_thread_id].agm.insertarEje(eje_actual);
             }
 
             // Se añaden a la cola de prioridad, los ejes alcanzables por el
@@ -271,7 +272,7 @@ void* mstParaleloThread(void *p) {
 
             log("Fusionandome con otro thread");
 
-            int nodoID = eje_actual.second;
+            int nodoID = eje_actual.nodoDestino;
 
             while (true) {
 
@@ -289,16 +290,15 @@ void* mstParaleloThread(void *p) {
 
             }
 
+            // En este punto se tiene el lock del otro thread y el otro thread
+            // tiene el nodo que queremos. Ahora lo fusionamos.
             log("Listo para fusionarme");
 
             // Hace la fusion
 
             // Añade el eje a alguno de los AGM para que quede después de la
             // fusión.
-            int padre = eje_actual.first;
-            int hijo = eje_actual.second;
-            int peso = g->getPeso(padre, hijo);
-            threadData[this_thread_id].agm.insertarEje(padre, hijo, peso);
+            threadData[this_thread_id].agm.insertarEje(eje_actual);
             log("inserté el eje");
 
             // llama a fuse()

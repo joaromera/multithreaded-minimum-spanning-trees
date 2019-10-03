@@ -2,38 +2,24 @@
 
 #include <vector>
 #include <queue>
+#include "grafo.h"
 
 using namespace std;
 
+/** Estructura para obtener el eje mas corto alcanzable en un ciclo de Prim.
+ *
+ * - En todo momento, `top()` debe devolver el eje mas corto alcanzable.
+ * - Cuando el thread se expande debe indicarle con `pop()` que ese eje mas
+ *   corto fue añadido al AGM.
+ */
 class ColaDePrioridad {
 
 private:
 
-    // -------------------------------------------------------------------------
-    // Estructuras de datos aux
-    // -------------------------------------------------------------------------
-
-    // Estructura interna para representar los ejes.
-    class _eje_t {
-    public:
-        int nodo_conocido;
-        int nodo_alcanzable;
-        int peso;
-
-        _eje_t(const int nodo_conocido,
-               const int nodo_alcanzable,
-               const int peso) :
-            nodo_conocido(nodo_conocido),
-            nodo_alcanzable(nodo_alcanzable),
-            peso(peso) {}
-
-    };
-
-
     // Lambda para comparar el peso de los ejes en la cola de prioridad
     class GreaterEje {
     public:
-        bool operator()(const _eje_t &lhs, const _eje_t &rhs) const {
+        bool operator()(const Eje &lhs, const Eje &rhs) const {
             return lhs.peso > rhs.peso;
         }
     };
@@ -43,7 +29,7 @@ private:
     // -------------------------------------------------------------------------
 
     // Ejes alcanzables por el thread.
-    std::priority_queue<_eje_t, vector<_eje_t>, GreaterEje> ejesVecinos;
+    std::priority_queue<Eje, vector<Eje>, GreaterEje> ejesVecinos;
 
 public:
 
@@ -52,13 +38,11 @@ public:
     // -------------------------------------------------------------------------
 
     /** Añade un eje a la cola de prioridad */
-    void addEje(const int nodo_conocido,
-                const int nodo_alcanzable,
-                const int peso);
+    void addEje(const Eje &e);
 
     /** Devuelve el par de nodos mas cercano en la cola de prioridad. Lo
      * elimina de la estructura de datos. */
-    std::pair<int,int> popEje();
+    Eje top();
 
     /** Devuelve true si la cola de prioridad esta vacia */
     bool empty() const;
@@ -68,6 +52,6 @@ public:
 
     /** Quita todos los elementos de la otra cola de prioridad y los inserta en
      * esta cola de prioridad. La otra cola de prioridad queda vacia. */
-    void fusionar(ColaDePrioridad cola);
+    void fusionar(ColaDePrioridad &cola);
 
 };
