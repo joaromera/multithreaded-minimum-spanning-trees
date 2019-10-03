@@ -133,3 +133,7 @@ int Grafo::getPeso(const int nodoA, const int nodoB) {
     }
     return -1;
 }
+
+void Grafo::insertarEje(const Eje &e) {
+    this->insertarEje(e.nodoOrigen, e.nodoDestino, e.peso);
+}
