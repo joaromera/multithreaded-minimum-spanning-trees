@@ -5,7 +5,7 @@ void ColaDePrioridad::addEje(const Eje &e) {
     ejesVecinos.push(e);
 }
 
-Eje ColaDePrioridad::top() {
+Eje ColaDePrioridad::top() const {
     return ejesVecinos.top();
 }
 
@@ -23,4 +23,8 @@ void ColaDePrioridad::fusionar(ColaDePrioridad &cola) {
         this->addEje( cola.ejesVecinos.top() );
         cola.ejesVecinos.pop();
     }
+}
+
+void ColaDePrioridad::pop() {
+    ejesVecinos.pop();
 }

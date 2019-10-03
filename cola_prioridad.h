@@ -40,9 +40,8 @@ public:
     /** Añade un eje a la cola de prioridad */
     void addEje(const Eje &e);
 
-    /** Devuelve el par de nodos mas cercano en la cola de prioridad. Lo
-     * elimina de la estructura de datos. */
-    Eje top();
+    /** Devuelve el par de nodos mas cercano en la cola de prioridad. */
+    Eje top() const;
 
     /** Devuelve true si la cola de prioridad esta vacia */
     bool empty() const;
@@ -53,5 +52,8 @@ public:
     /** Quita todos los elementos de la otra cola de prioridad y los inserta en
      * esta cola de prioridad. La otra cola de prioridad queda vacia. */
     void fusionar(ColaDePrioridad &cola);
+
+    /** Elimina el elemento de menor peso */
+    void pop();
 
 };
