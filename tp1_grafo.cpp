@@ -15,6 +15,7 @@
 #include "cola_de_fusiones.h"
 #include "colores.h"
 #include "log.h"
+#include <cassert>
 
 using namespace std;
 
@@ -59,6 +60,9 @@ struct Thread {
         pthread_mutex_trylock(&fusionReady);
     };
 
+    bool bloqueado;
+    pthread_mutex_t bloqueadoMutex;
+
     // Permite a los otros threads pedir fusion con este thread.
     ColaDeFusiones colaDeFusiones;
     pthread_mutex_t fusionReady;
@@ -74,6 +78,8 @@ struct Thread {
         // Inicializa AGM vacio.
         agm = Grafo();
         for (size_t i = 0; i < nVertices; ++i) { agm.insertarNodo(i); }
+
+        pthread_mutex_init(&bloqueadoMutex, NULL);
 
         // Reinicia 
         ejesVecinos.reset();
@@ -171,40 +177,38 @@ void add_ejes_alcanzables(const id_thread thread, Grafo* g, const int nodo) {
 
 }
 
-// Realizar la fusión
-void fuse(const int thread1, const int thread2) {
-
-    log("Iniciando fusion.");
-
-    //Se determina el thread que tengo que fusionar
-    if (thread2 < thread1) {
-        fuse(thread2, thread1);
-        return;
+void fuse_agm(Grafo &g1, Grafo &g2) {
+    for (int i = 0; i < g1.numVertices; i++) {
+        log("fuse_agm: pasando ejes del nodo %d", i);
+        for (auto &e : g2.listaDeAdyacencias[i]) {
+            g1.listaDeAdyacencias[i].push_back(e);
+        }
     }
+    g1.numEjes += g2.numEjes;
 
-    // Colorea todos los nodos de thread2 como nodos de thread1
-    colores.fusionarThreads(thread1, thread2);
-    log("fusionando colores ok.");
+    // Reiniciar g2
+}
 
-    // Pasa todos los vertices de thread2 al agm de thread1
-    Grafo &agmThread1 = threadData[thread1].agm;
-    Grafo &agmThread2 = threadData[thread2].agm;
-    log("iniciando mv");
-    for ( int i = 0; i < agmThread2.numVertices; ++i ) {
-        log("moviendo");
-        vector<Eje> &v = agmThread2.listaDeAdyacencias[i];
-        move(v.begin(), v.end(), agmThread1.listaDeAdyacencias[i].end());
-    }
-    agmThread1.numEjes += agmThread2.numEjes;
-    log("fusionando agms ok");
+void fuse(const int tid1, const int tid2, const int nodo1, const int nodo2) {
 
-    // Pasa todos los ejes de la cola de prioridad a este thread
-    threadData[thread1].ejesVecinos.fusionar(threadData[thread2].ejesVecinos);
-    log("fusionando colasDePrioridad ok");
+    assert(tid1 < tid2);
+    assert(colores.esDueno(nodo1, tid1));
+    assert(colores.esDueno(nodo2, tid2));
 
-    // reinicia thread2
-    threadData[thread2].reset(agmThread1.numVertices);
-    log("reset ok");
+    log("fuse: iniciando fusion %d->%d sobre (%d, %d)",
+        tid1, tid2, nodo1, nodo2);
+
+    log("fuse: pasando nodos de %d a %d", tid2, tid1);
+    colores.fusionarThreads(tid1, tid2);
+    log("fuse: pasando AGM de %d a %d", tid2, tid1);
+    fuse_agm(threadData[tid1].agm, threadData[tid2].agm);
+    log("fuse: añadiendo (%d, %d) al AGM", nodo1, nodo2);
+    // FIXME
+    log("fuse: volcando cola de prioridad %d a %d", tid2, tid1);
+    threadData[tid1].ejesVecinos.fusionar(threadData[tid2].ejesVecinos);
+    log("fuse: reiniciando thread %d", tid2);
+    threadData[tid2].reset(threadData[tid1].agm.numVertices);
+    log("fuse: finish");
 
 }
 
@@ -282,47 +286,36 @@ void* mstParaleloThread(void *p) {
             // nuevo nodo.
             add_ejes_alcanzables(this_thread_id, g, hijo);
 
+            // Quita el eje de la cola de prioridad
+            threadData[this_thread_id].ejesVecinos.pop();
+
+            log("Se termino de pintar el nodo libre");
+
         } else {
 
             log("Fusionandome con otro thread");
 
-            int nodoID = eje_actual.nodoDestino;
+            threadData[this_thread_id].bloqueado = true;
 
-            while (true) {
-
-                // Espera a que el otro thread este listo para fusionar.
-                threadData[thread_info].colaDeFusiones.requestFusion();
-
-                // El otro thread esta listo para que este lo fusione. Me fijo
-                // si sigue siendo dueño:
-                if (! colores.esDueno(nodoID, thread_info)) {
-                    pthread_mutex_unlock(&threadData[thread_info].fusionReady);
-                    thread_info = colores.capturarNodo(nodoID, -1);
-                } else {
-                    break;
-                }
-
+            if ( threadData[thread_info].bloqueado ) {
+                // Me desbloqueo. Acepto fusiones y vuelvo a intentar con el
+                // mismo nodo.
+                threadData[this_thread_id].bloqueado = false;
+                continue;
             }
 
-            // En este punto se tiene el lock del otro thread y el otro thread
-            // tiene el nodo que queremos. Ahora lo fusionamos.
-            log("Listo para fusionarme");
+            log("listo para fusionarme con %d", thread_info);
 
-            // Hace la fusion
-
-            // Añade el eje a alguno de los AGM para que quede después de la
-            // fusión.
+            log("Insertando el eje de la fusion");
             threadData[this_thread_id].agm.insertarEje(eje_actual);
-            log("inserté el eje");
-
-            // llama a fuse()
-            fuse(this_thread_id, thread_info);
+            log("llamando a fuse");
+            if (this_thread_id < thread_info) {
+                fuse(this_thread_id, thread_info, eje_actual.nodoOrigen, eje_actual.nodoDestino);
+            } else {
+                fuse(thread_info, this_thread_id, eje_actual.nodoOrigen, eje_actual.nodoDestino);
+            }
             log("Fuse OK");
-
             // Desbloqueo el otro thread.
-            pthread_mutex_unlock(&threadData[this_thread_id].fusionReady);
-            log("Fusión ok");
-
             log("Fusion terminada");
 
         }

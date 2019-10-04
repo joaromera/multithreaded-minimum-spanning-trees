@@ -12,22 +12,21 @@ bool ColaDeFusiones::notEmpty() const {
     return ans;
 }
 
-void ColaDeFusiones::requestFusion() {
+pthread_mutex_t* ColaDeFusiones::requestFusion() {
 
     // Inicializo un mutex cerrado para esperar a que el thread con el que me
     // quiero fusionar me de el ok.
-    pthread_mutex_t mutex;
-    pthread_mutex_init(&mutex, NULL);
-    pthread_mutex_trylock(&mutex); // cierra el mutex
+    pthread_mutex_t *mutex =
+        (pthread_mutex_t*) malloc(sizeof(pthread_mutex_t));
+    pthread_mutex_init(mutex, NULL);
+    pthread_mutex_trylock(mutex); // cierra el mutex
 
     // Pongo ese mutex en la cola
     pthread_mutex_lock(&_lock);
-        _q.push(&mutex);
+        _q.push(mutex);
     pthread_mutex_unlock(&_lock);
 
-    // espero a que el thread me de el ok para fusionarme.
-    pthread_mutex_lock(&mutex); // wait
-    pthread_mutex_destroy(&mutex); // Cierro el mutex x las dudas
+    return mutex;
 
 }
 
