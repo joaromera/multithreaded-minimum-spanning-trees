@@ -58,6 +58,7 @@ struct Thread {
         pthread_mutex_init(&fusionReady, NULL);
         // Bloquea hasta que otro thread termine de fusionarse.
         pthread_mutex_trylock(&fusionReady);
+        pthread_mutex_init(&bloqueadoMutex, NULL);
     };
 
     bool bloqueado;
@@ -78,8 +79,6 @@ struct Thread {
         // Inicializa AGM vacio.
         agm = Grafo();
         for (size_t i = 0; i < nVertices; ++i) { agm.insertarNodo(i); }
-
-        pthread_mutex_init(&bloqueadoMutex, NULL);
 
         // Reinicia 
         ejesVecinos.reset();
@@ -239,6 +238,7 @@ void* mstParaleloThread(void *p) {
         // Si otro thread esta en la cola de fusiones de este thread lo
         // notifica que puede fusionarse.
 
+        // FIXME nadie me esta pidiendo 
         while ( threadData[this_thread_id].colaDeFusiones.notEmpty() ) {
             log("Atendiendo un pedido de fusion");
 
@@ -257,6 +257,15 @@ void* mstParaleloThread(void *p) {
         StatusBuscarNodo status = buscarNodo(this_thread_id, eje_actual);
         if (status == NoHayNodosDisponibles) {
             log("Terminando proceso. ya no hay nodos disponibles");
+
+            // Al terminar el thread, es posible tener otro thread pidiendo una
+            // fusión. Le da acknoweledge a esos threads para que sepan que ya
+            // no tenemos el nodo deseado.
+            log("Limpiando mi cola de fusiones");
+            while ( threadData[this_thread_id].colaDeFusiones.notEmpty() ) {
+                threadData[this_thread_id].colaDeFusiones.acknowledgeFusion();
+                pthread_mutex_lock(&threadData[this_thread_id].fusionReady);
+            }
             return NULL;
         }
         if (status == AgmCompleto) {
@@ -293,44 +302,57 @@ void* mstParaleloThread(void *p) {
             add_ejes_alcanzables(this_thread_id, g, hijo);
 
             // Quita el eje de la cola de prioridad
-            threadData[this_thread_id].ejesVecinos.pop();
+            // threadData[this_thread_id].ejesVecinos.pop();
 
-            log("Se termino de pintar el nodo libre");
+            log("Se termino de pintar el nodo libre %d", eje_actual.nodoDestino);
 
         } else {
 
-            log("Fusionandome con otro thread");
+            log("Me quiero fusionar con el thread %d por el nodo %d.", thread_info, eje_actual.nodoDestino);
 
-            threadData[this_thread_id].bloqueado = true;
-
-            if ( threadData[thread_info].bloqueado ) {
-                // Me desbloqueo. Acepto fusiones y vuelvo a intentar con el
-                // mismo nodo.
-                threadData[this_thread_id].bloqueado = false;
+            if (pthread_mutex_trylock(&threadData[this_thread_id].bloqueadoMutex) != 0){
+                log("No pude bloquearme a mi mismo. Vuelvo al principio.");
                 continue;
             }
 
-            log("Esperando ack para la fusion");
+            if ( pthread_mutex_trylock(&threadData[thread_info].bloqueadoMutex) != 0) {
+                // Me desbloqueo. Acepto fusiones y vuelvo a intentar con el
+                // mismo nodo.
+                pthread_mutex_unlock(&threadData[this_thread_id].bloqueadoMutex);
+                log("No pude bloquear al thread %d. Me desbloqueo y vuelvo al principio.", thread_info);
+                continue;
+            }
+
+            log("Esperando ack de %d para la fusion", thread_info);
             pthread_mutex_t* fusion_ack = threadData[thread_info].colaDeFusiones.requestFusion();
             pthread_mutex_lock(fusion_ack);
 
-            log("listo para fusionarme con %d", thread_info);
+            log("Fusionandome con %d", thread_info);
 
-            log("Insertando el eje de la fusion");
-            threadData[this_thread_id].agm.insertarEje(eje_actual);
-            log("llamando a fuse");
-            if (this_thread_id < thread_info) {
-                fuse(this_thread_id, thread_info, eje_actual.nodoOrigen, eje_actual.nodoDestino);
+            // Verifica que el nodo sigue perteneciendo al mismo thread. Esto
+            // puede cambiar si el otro thread aceptó una fusion entrante antes
+            // de atender a este thread.
+            if ( colores.esDueno(eje_actual.nodoDestino, thread_info) ) {
+
+                threadData[this_thread_id].agm.insertarEje(eje_actual);
+                if (this_thread_id < thread_info) {
+                    fuse(this_thread_id, thread_info,
+                         eje_actual.nodoOrigen, eje_actual.nodoDestino);
+                } else {
+                    fuse(thread_info, this_thread_id,
+                         eje_actual.nodoDestino, eje_actual.nodoOrigen);
+                }
+
             } else {
-                fuse(thread_info, this_thread_id, eje_actual.nodoDestino, eje_actual.nodoOrigen);
+                log("Cuando llegué %d no era mas dueño %d", thread_info, eje_actual.nodoDestino);
             }
-            log("Fuse OK");
+
             // Desbloqueo el otro thread.
-
+            pthread_mutex_unlock(&threadData[thread_info].bloqueadoMutex);
+            pthread_mutex_unlock(&threadData[this_thread_id].bloqueadoMutex);
             pthread_mutex_unlock(&threadData[thread_info].fusionReady);
-            log("Fusion terminada");
-
             threadData[this_thread_id].bloqueado = false;
+            log("Termina fusion");
 
         }
 

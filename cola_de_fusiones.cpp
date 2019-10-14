@@ -42,3 +42,7 @@ void ColaDeFusiones::acknowledgeFusion() {
 
     pthread_mutex_unlock(&_lock);
 }
+
+void ColaDeFusiones::terminar() {
+    while (notEmpty()) acknowledgeFusion();
+}

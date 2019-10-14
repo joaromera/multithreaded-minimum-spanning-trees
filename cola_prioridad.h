@@ -57,6 +57,6 @@ public:
     /** Elimina el elemento de menor peso */
     void pop();
 
-    std::string toString();
+    std::string toString() const;
 
 };

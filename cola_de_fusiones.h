@@ -21,6 +21,10 @@ public:
      */
     void acknowledgeFusion();
 
+    /** Llamar esto al terminar la ejecución del thread. Da acknowledge a todos
+     * los que estaban esperando. */
+    void terminar();
+
 private:
     mutable pthread_mutex_t _lock;
     std::queue<pthread_mutex_t*> _q;
