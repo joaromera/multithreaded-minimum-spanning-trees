@@ -1,5 +1,6 @@
 #pragma once
 
+#include <string>
 #include <vector>
 #include <queue>
 #include "grafo.h"
@@ -55,5 +56,7 @@ public:
 
     /** Elimina el elemento de menor peso */
     void pop();
+
+    std::string toString();
 
 };

@@ -1,3 +1,4 @@
+#include <sstream>
 #include "cola_prioridad.h"
 
 
@@ -27,4 +28,22 @@ void ColaDePrioridad::fusionar(ColaDePrioridad &cola) {
 
 void ColaDePrioridad::pop() {
     ejesVecinos.pop();
+}
+
+std::string ColaDePrioridad::toString() {
+    std::priority_queue<Eje, vector<Eje>, GreaterEje> tmp = ejesVecinos;
+    std::stringstream buf;
+
+    buf << "[ ";
+
+    while ( ! tmp.empty() ) {
+        const Eje e = tmp.top();
+        buf << "(";
+        buf << e.nodoOrigen << ",";
+        buf << e.nodoDestino << ",";
+        buf << e.peso << ")";
+        tmp.pop();
+    }
+
+    return buf.str();
 }

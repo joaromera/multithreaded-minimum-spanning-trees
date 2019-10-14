@@ -139,6 +139,7 @@ StatusBuscarNodo buscarNodo(int thread, Eje &out) {
         log("buscarNodo: Va a devolver el nodo alcanzable mas cercano.");
         while ( ! threadData[thread].ejesVecinos.empty() ) {
             Eje e = threadData[thread].ejesVecinos.top();
+            log("buscarNodo: probando eje (%d, %d)", e.nodoOrigen, e.nodoDestino);
             if (! colores.esDueno(e.nodoDestino, thread)) {
                 out = e;
                 return Ok;
@@ -169,11 +170,16 @@ int initThread(Grafo *g) {
 void add_ejes_alcanzables(const id_thread thread, Grafo* g, const int nodo) {
 
     ColaDePrioridad &cola = threadData[thread].ejesVecinos;
+    log("add_ejes_alcanzables: añadiendo ejes alcanzables desde %d", nodo);
 
     std::for_each(g->vecinosBegin(nodo), g->vecinosEnd(nodo),
         [&](const Eje &e){
+            log("add_ejes_alcanzables: añadiendo eje (%d, %d)", e.nodoOrigen, e.nodoDestino);
             cola.addEje(e);
         });
+
+    log("add_ejes_alcanzables: Cola de prioridad es %s",
+            threadData[thread].ejesVecinos.toString().c_str());
 
 }
 
