@@ -304,6 +304,10 @@ void* mstParaleloThread(void *p) {
                 continue;
             }
 
+            log("Esperando ack para la fusion");
+            pthread_mutex_t* fusion_ack = threadData[thread_info].colaDeFusiones.requestFusion();
+            pthread_mutex_lock(fusion_ack);
+
             log("listo para fusionarme con %d", thread_info);
 
             log("Insertando el eje de la fusion");
@@ -312,11 +316,15 @@ void* mstParaleloThread(void *p) {
             if (this_thread_id < thread_info) {
                 fuse(this_thread_id, thread_info, eje_actual.nodoOrigen, eje_actual.nodoDestino);
             } else {
-                fuse(thread_info, this_thread_id, eje_actual.nodoOrigen, eje_actual.nodoDestino);
+                fuse(thread_info, this_thread_id, eje_actual.nodoDestino, eje_actual.nodoOrigen);
             }
             log("Fuse OK");
             // Desbloqueo el otro thread.
+
+            pthread_mutex_unlock(&threadData[thread_info].fusionReady);
             log("Fusion terminada");
+
+            threadData[this_thread_id].bloqueado = false;
 
         }
 
