@@ -12,7 +12,6 @@
 #include <chrono>
 #include "lista_de_colores.h"
 #include "cola_prioridad.h"
-#include "cola_de_fusiones.h"
 #include "colores.h"
 #include "log.h"
 #include <cassert>
@@ -52,21 +51,21 @@ struct Thread {
     // Cola de prioridad para obtener el eje alcanzable mas corto.
     ColaDePrioridad ejesVecinos;
 
+    pthread_mutex_t fusion_req; // Me bloquea para fusionarme
+    pthread_mutex_t fusion_ack; // Acepto la fusion de quien tenga mi `lock`
+    pthread_mutex_t fusion_ready; // Terminaron de fusionarme
+
     // Constructor nulo. Cada thread se encarga de inicializar el estado
     // correspondiente pasandole el grafo como parámetro.
     Thread() {
-        pthread_mutex_init(&fusionReady, NULL);
-        // Bloquea hasta que otro thread termine de fusionarse.
-        pthread_mutex_trylock(&fusionReady);
-        pthread_mutex_init(&bloqueadoMutex, NULL);
+        log("inicializando thread");
+        pthread_mutex_init(&fusion_req, NULL);
+        pthread_mutex_init(&fusion_ack, NULL);
+        pthread_mutex_trylock(&fusion_ack);
+        pthread_mutex_init(&fusion_ready, NULL);
+        pthread_mutex_trylock(&fusion_ready);
+        log("fin init thread");
     };
-
-    bool bloqueado;
-    pthread_mutex_t bloqueadoMutex;
-
-    // Permite a los otros threads pedir fusion con este thread.
-    ColaDeFusiones colaDeFusiones;
-    pthread_mutex_t fusionReady;
 
     /** Reinicia el estado interno del thread.
      *
@@ -169,11 +168,8 @@ int initThread(Grafo *g) {
 void add_ejes_alcanzables(const id_thread thread, Grafo* g, const int nodo) {
 
     ColaDePrioridad &cola = threadData[thread].ejesVecinos;
-    log("add_ejes_alcanzables: añadiendo ejes alcanzables desde %d", nodo);
-
     std::for_each(g->vecinosBegin(nodo), g->vecinosEnd(nodo),
         [&](const Eje &e){
-            log("add_ejes_alcanzables: añadiendo eje (%d, %d)", e.nodoOrigen, e.nodoDestino);
             cola.addEje(e);
         });
 
@@ -217,6 +213,23 @@ void fuse(const int tid1, const int tid2, const int nodo1, const int nodo2) {
 
 }
 
+/** Atender pedidos de fusion entreantes a un thread `tid`.
+ *
+ * Al terminar, el mutex `fusion_req` de este thread quedará cerrado, por lo
+ * que deberá desbloquearse si se decea que el thread pueda seguir recibiendo
+ * pedidos de fusión. */
+void thread_attend_fusion_requests(int tid) {
+    log("thread_attend_fusion_requests: atendiendo.", tid);
+    // Mientras exista un fusion_req entrante, 
+    while ( pthread_mutex_trylock(&threadData[tid].fusion_req) ) {
+        log("thread_attend_fusion_requests: Dando ack.", tid);
+        pthread_mutex_unlock(&threadData[tid].fusion_ack);
+        pthread_mutex_lock(&threadData[tid].fusion_ready);
+        log("thread_attend_fusion_requests: Recibido el fusion_ready.", tid);
+    }
+    log("thread_attend_fusion_requests: se termino de atender.", tid);
+}
+
 // Gestión principal del thread. Contiene el ciclo que le permite a cada thread hacer sus funciones.
 void* mstParaleloThread(void *p) {
 
@@ -239,16 +252,10 @@ void* mstParaleloThread(void *p) {
         // notifica que puede fusionarse.
 
         // FIXME nadie me esta pidiendo 
-        while ( threadData[this_thread_id].colaDeFusiones.notEmpty() ) {
-            log("Atendiendo un pedido de fusion");
-
-            threadData[this_thread_id].colaDeFusiones.acknowledgeFusion();
-            log("Esperando a que fusion termine");
-
-            // Quedo bloqueado hasta que el otro thread termine de fusionarme
-            pthread_mutex_lock(&threadData[this_thread_id].fusionReady);
-            log("terminaron de fusionarme.");
-        }
+        log("Atendiendo pedidos de fusion si los hay.");
+        thread_attend_fusion_requests(this_thread_id);
+        log("listo atendiendo pedidos de fusion.");
+        pthread_mutex_unlock(&threadData[this_thread_id].fusion_req);
 
         log("Buscando nodo mas cercano");
 
@@ -262,10 +269,8 @@ void* mstParaleloThread(void *p) {
             // fusión. Le da acknoweledge a esos threads para que sepan que ya
             // no tenemos el nodo deseado.
             log("Limpiando mi cola de fusiones");
-            while ( threadData[this_thread_id].colaDeFusiones.notEmpty() ) {
-                threadData[this_thread_id].colaDeFusiones.acknowledgeFusion();
-                pthread_mutex_lock(&threadData[this_thread_id].fusionReady);
-            }
+            thread_attend_fusion_requests(this_thread_id);
+            // Esta vez no libero el `lock` de este thread para que no me pidan mas fusiones.
             return NULL;
         }
         if (status == AgmCompleto) {
@@ -310,22 +315,22 @@ void* mstParaleloThread(void *p) {
 
             log("Me quiero fusionar con el thread %d por el nodo %d.", thread_info, eje_actual.nodoDestino);
 
-            if (pthread_mutex_trylock(&threadData[this_thread_id].bloqueadoMutex) != 0){
+            log("Trylock a mi mismo");
+            if ( pthread_mutex_trylock(&threadData[this_thread_id].fusion_req) != 0 ) {
                 log("No pude bloquearme a mi mismo. Vuelvo al principio.");
                 continue;
             }
 
-            if ( pthread_mutex_trylock(&threadData[thread_info].bloqueadoMutex) != 0) {
+            if ( pthread_mutex_trylock(&threadData[thread_info].fusion_req) != 0 ) {
                 // Me desbloqueo. Acepto fusiones y vuelvo a intentar con el
                 // mismo nodo.
-                pthread_mutex_unlock(&threadData[this_thread_id].bloqueadoMutex);
+                pthread_mutex_unlock(&threadData[this_thread_id].fusion_req);
                 log("No pude bloquear al thread %d. Me desbloqueo y vuelvo al principio.", thread_info);
                 continue;
             }
 
             log("Esperando ack de %d para la fusion", thread_info);
-            pthread_mutex_t* fusion_ack = threadData[thread_info].colaDeFusiones.requestFusion();
-            pthread_mutex_lock(fusion_ack);
+            pthread_mutex_lock(&threadData[thread_info].fusion_ack);
 
             log("Fusionandome con %d", thread_info);
 
@@ -348,10 +353,12 @@ void* mstParaleloThread(void *p) {
             }
 
             // Desbloqueo el otro thread.
-            pthread_mutex_unlock(&threadData[thread_info].bloqueadoMutex);
-            pthread_mutex_unlock(&threadData[this_thread_id].bloqueadoMutex);
-            pthread_mutex_unlock(&threadData[thread_info].fusionReady);
-            threadData[this_thread_id].bloqueado = false;
+            log("Desbloqueo thread %d", thread_info);
+            pthread_mutex_unlock(&threadData[thread_info].fusion_req);
+            log("Desbloqueo thread %d", this_thread_id);
+            pthread_mutex_unlock(&threadData[this_thread_id].fusion_req);
+            log("Doy fusion_ready a %d", thread_info);
+            pthread_mutex_unlock(&threadData[thread_info].fusion_ready);
             log("Termina fusion");
 
         }
