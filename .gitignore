@@ -34,3 +34,9 @@ TP1
 
 # Debugger
 .gdb_history
+
+# Latex
+*.log
+*.aux
+*.toc
+*.pdf

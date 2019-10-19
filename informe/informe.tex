@@ -1,0 +1,107 @@
+% ******************************************************** %
+%              TEMPLATE DE INFORME ORGA2 v0.1              %
+% ******************************************************** %
+% ******************************************************** %
+%                                                          %
+% ALGUNOS PAQUETES REQUERIDOS (EN UBUNTU):                 %
+% ========================================
+%                                                          %
+% texlive-latex-base                                       %
+% texlive-latex-recommended                                %
+% texlive-fonts-recommended                                %
+% texlive-latex-extra?                                     %
+% texlive-lang-spanish (en ubuntu 13.10)                   %
+% ******************************************************** %
+\documentclass[a4paper]{article}
+\usepackage[spanish]{babel}
+\usepackage[utf8]{inputenc}
+\usepackage{charter}   % tipografia
+\usepackage{graphicx}
+%\usepackage{makeidx}
+\usepackage{paralist} %itemize inline
+\usepackage{algorithm}  % implementacion ondas en C
+% sudo apt-get install texlive-science
+\usepackage{algorithmic} % implementacion ondas en C
+%\usepackage{float}
+\usepackage{amsmath, amsthm, amssymb}
+%\usepackage{amsfonts}
+%\usepackage{sectsty}
+%\usepackage{charter}
+%\usepackage{wrapfig}
+%\usepackage{listings}
+%\lstset{language=C}
+% \setcounter{secnumdepth}{2}
+\usepackage{wrapfig}
+\usepackage{underscore}
+\usepackage{caratula}
+\usepackage{url}
+\usepackage{multicol}
+
+% ********************************************************* %
+% ~~~~~~~~              Code snippets             ~~~~~~~~~ %
+% ********************************************************* %
+\usepackage{color} % para snipets de codigo coloreados
+\usepackage{fancybox}  % para el sbox de los snipets de codigo
+\definecolor{litegrey}{gray}{0.94}
+\newenvironment{codesnippet}{%
+	\begin{Sbox}\begin{minipage}{\textwidth}\sffamily\small}%
+	{\end{minipage}\end{Sbox}%
+		\begin{center}%
+		\vspace{0cm}\colorbox{litegrey}{\TheSbox}\end{center}\vspace{0cm}}
+% ********************************************************* %
+% ~~~~~~~~         Formato de las páginas         ~~~~~~~~~ %
+% ********************************************************* %
+\usepackage{fancyhdr}
+\pagestyle{fancy}
+%\renewcommand{\chaptermark}[1]{\markboth{#1}{}}
+\renewcommand{\sectionmark}[1]{\markright{\thesection\ - #1}}
+\fancyhf{}
+\fancyhead[LO]{Sección \rightmark} % \thesection\ 
+\fancyfoot[LO]{\small{Centeno, Romera, Ghianni}}
+\fancyfoot[RO]{\thepage}
+\renewcommand{\headrulewidth}{0.5pt}
+\renewcommand{\footrulewidth}{0.5pt}
+\setlength{\hoffset}{-0.8in}
+\setlength{\textwidth}{16cm}
+%\setlength{\hoffset}{-1.1cm}
+%\setlength{\textwidth}{16cm}
+\setlength{\headsep}{0.5cm}
+\setlength{\textheight}{25cm}
+\setlength{\voffset}{-0.7in}
+\setlength{\headwidth}{\textwidth}
+\setlength{\headheight}{13.1pt}
+\renewcommand{\baselinestretch}{1.1}  % line spacing
+% ******************************************************** %
+
+\begin{document}
+
+\thispagestyle{empty}
+\materia{Sistemas Operativos}
+\submateria{Segundo Cuatrimestre de 2019}
+\titulo{Trabajo Práctico I}
+\integrante{Joaquin P. Centeno}{699/16}{joaquinpcenteno@gmail.com}
+\integrante{Joaquin Romera }{183/16}{joakromera@gmail.com}
+\integrante{Hernán Ghianni}{538/16}{herghia@gmail.com}
+
+\maketitle
+
+\newpage
+
+\thispagestyle{empty}
+\vfill
+\thispagestyle{empty}
+\vspace{3cm}
+
+\tableofcontents
+\newpage
+
+\input{0-introduccion}
+\newpage
+
+\section{Filtros}
+\input{1-cuadrados}
+\newpage
+\input{5-experimentacion}
+\newpage
+\input{14-conclusiones}
+\end{document}

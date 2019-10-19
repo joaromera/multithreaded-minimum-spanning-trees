@@ -1,0 +1,32 @@
+\section{Introducción}
+En el presente trabajo hicimos un primer acercamiento al modelo de ejecución SIMD (Single instruction Multiple Data). Diseñado como una extensión al set de instrucciones de la arquitectura x86 e introducido por Intel en 1999, esta técnica de paralelización puede mejorar notablemente la performance de un sistema en contextos de programación donde se deben aplicar algoritmos repetitivos sobre un mismo conjunto de datos. Esto lo hace particularmente útil para procesamientos multimedia -audio, video e imágenes- donde la reproducción en tiempo real es crítica. Gracias a las instrucciones SIMD podemos ejecutar una misma operación sobre muchos datos al mismo tiempo en una sola instrucción, contrario a realizarlo en un modelo exclusivamente SISD (single instruction single data). Como veremos a lo largo del trabajo su utilización introducirá notables mejoras en performance y eficiencia de nuestros algoritmos en una gran cantidad de casos siempre que sea posible su aplicación.
+
+\begin{center}
+  \begin{tabular}{cccc}
+    \includegraphics[width=0.30\textwidth]{imagenes/sisdsimd.png} &
+    \includegraphics[width=0.30\textwidth]{imagenes/registrossimd.png}\\
+  \end{tabular}
+ \end{center}
+
+\subsection{Objetivos Generales}
+Además de la exploración del modelo SIMD se repasaron conceptos y técnicas de programación vectorizada en C y ASM dentro del campo de aplicación del procesamiento de imágenes. Para esto se llevó a cabo la implementación de los siguientes filtros:
+
+\begin{center}
+ \begin{tabular}{cccc}
+   \includegraphics[width=0.2\textwidth]{imagenes/ncfom.jpg} &
+   \includegraphics[width=0.2\textwidth]{imagenes/ncfom-cuadrados.jpg} &
+   \includegraphics[width=0.2\textwidth]{imagenes/ncfom-manchas.jpg} \\
+   Imagen original & Cuadrados & Manchas \\
+   \\
+   \includegraphics[width=0.2\textwidth]{imagenes/ncfom-offset.jpg} &
+   \includegraphics[width=0.2\textwidth]{imagenes/ncfom-sharpen.jpg} \\
+   Offset & Sharpen \\
+ \end{tabular}
+\end{center}
+
+\subsection{Metodología de trabajo}
+Al disponer de las implementaciones en C de todos los filtros, se procedió a realizar su implementación en lenguaje ensamblador para la arquitectura x86-64 de Intel. Para esto, se utilizaron las instrucciones SSE de dicha arquitectura, que aprovechan el ya mencionado modelo SIMD para procesar datos en forma paralela.
+
+Una vez realizadas estas implementaciones, fueron sometidas a un proceso de comparación para extraer conclusiones acerca de su rendimiento. Con este fin, se experimentó con variaciones tanto en los datos de entrada como en detalles implementativos de los mismos algoritmos. De esta manera, se pudo recopilar datos sobre el comportamiento de cada implementación, y contrastar estos resultados con diversas hipótesis previamente elaboradas.
+
+A continuación introducimos los filtros y sus respectivas implementaciones, luego describimos los tests realizados y los resultados obtenidos, y finalmente a partir de estos datos otorgamos algunas conclusiones sobre la experiencia realizada.
