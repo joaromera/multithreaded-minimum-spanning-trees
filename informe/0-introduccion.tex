@@ -1,34 +1,32 @@
 \section{Introducción}
-This paper proposes a new adaptive deadlock-free routing scheme to improve the performance of irregular networks by using multiple spanning trees. The traditional up*/down* routing algorithm used a single root, where the root can be a hotspot. The multiple layer spanning tree scheme used different virtual networks for different spanning trees. Bandwidths of the system may be not fully utilized. The proposed new deadlock-free adaptive routing scheme uses multiple spanning trees, where different packets are delivered along different trees. There may exist some potential cyclic channel dependencies based on the multiple-spanning-tree-based routing scheme in VCT-switched networks. A simple scheme is proposed to avoid potential cyclic channel dependencies by selecting the minimum number of constrained turns. Sufficient simulation results are presented to show the effectiveness of the proposed method.
+En este trabajo se propone una solución para resolver el problema de encontrar árboles generadores mínimos de grafos (AGM) con múltiples threads, evitando deadlocks y otros problemas asociados a los algoritmos sobre sistemas ditribuídos. El algoritmo tradicional es Prim ejecutado como un único proceso, empezando en un nodo y avanzando siempre por el eje de menor peso hacia el próximo vecino no visitado. Nuestra propuesta permite elegir la cantidad de threads que van a encontrar un AGM para un grafo determinado, al momento de ejecución se utiliza una versión paralela del antes mencionado algoritmo de Prim, replicado en tantos hilos como hayan sido elegidos el mismo proceso pero iniciando cada uno desde un nodo diferente del mismo grafo. Los problemas potenciales que pueden existir en esta estrategia surgen cuando más de un thread quiere capturar el mismo nodo, o cuando uno o más threads quiere capturar un nodo perteneciente ya a otro thread. A estos escenarios se suma la complejidad de resolver ciclos cuando dos threads se quieren fusionar mutuamente, y aquellso relacionados con la naturaleza de la programación asincrónica y distribuida: evitar deadlocks, starvations, y race conditions. Un esquema simple para resolver estas dificultades fue propuesta utilizando locks y trylocks. Se presentan resultados de experimentaciones para mostrar la efectividad del método propuesto.
 
-En este trabajo se propone una solución para resolver el problema de encontrar árboles generadores mínimos de grafos con múltiples threads, evitando deadlocks y otros problemas asociados a los algoritmos sobre sistemas ditribuídos. El algoritmo tradicional es Prim ejecutado como un único proceso, empezando en un nodo y avanzando siempre por el eje de menor peso hacia el próximo vecino no visitado.
+% \begin{center}
+%   \begin{tabular}{cccc}
+%     \includegraphics[width=0.30\textwidth]{imagenes/sisdsimd.png} &
+%     \includegraphics[width=0.30\textwidth]{imagenes/registrossimd.png}\\
+%   \end{tabular}
+%  \end{center}
 
-\begin{center}
-  \begin{tabular}{cccc}
-    \includegraphics[width=0.30\textwidth]{imagenes/sisdsimd.png} &
-    \includegraphics[width=0.30\textwidth]{imagenes/registrossimd.png}\\
-  \end{tabular}
- \end{center}
+% \subsection{Objetivos Generales}
+% Además de la exploración del modelo SIMD se repasaron conceptos y técnicas de programación vectorizada en C y ASM dentro del campo de aplicación del procesamiento de imágenes. Para esto se llevó a cabo la implementación de los siguientes filtros:
 
-\subsection{Objetivos Generales}
-Además de la exploración del modelo SIMD se repasaron conceptos y técnicas de programación vectorizada en C y ASM dentro del campo de aplicación del procesamiento de imágenes. Para esto se llevó a cabo la implementación de los siguientes filtros:
+% \begin{center}
+%  \begin{tabular}{cccc}
+%    \includegraphics[width=0.2\textwidth]{imagenes/ncfom.jpg} &
+%    \includegraphics[width=0.2\textwidth]{imagenes/ncfom-cuadrados.jpg} &
+%    \includegraphics[width=0.2\textwidth]{imagenes/ncfom-manchas.jpg} \\
+%    Imagen original & Cuadrados & Manchas \\
+%    \\
+%    \includegraphics[width=0.2\textwidth]{imagenes/ncfom-offset.jpg} &
+%    \includegraphics[width=0.2\textwidth]{imagenes/ncfom-sharpen.jpg} \\
+%    Offset & Sharpen \\
+%  \end{tabular}
+% \end{center}
 
-\begin{center}
- \begin{tabular}{cccc}
-   \includegraphics[width=0.2\textwidth]{imagenes/ncfom.jpg} &
-   \includegraphics[width=0.2\textwidth]{imagenes/ncfom-cuadrados.jpg} &
-   \includegraphics[width=0.2\textwidth]{imagenes/ncfom-manchas.jpg} \\
-   Imagen original & Cuadrados & Manchas \\
-   \\
-   \includegraphics[width=0.2\textwidth]{imagenes/ncfom-offset.jpg} &
-   \includegraphics[width=0.2\textwidth]{imagenes/ncfom-sharpen.jpg} \\
-   Offset & Sharpen \\
- \end{tabular}
-\end{center}
+% \subsection{Metodología de trabajo}
+% Al disponer de las implementaciones en C de todos los filtros, se procedió a realizar su implementación en lenguaje ensamblador para la arquitectura x86-64 de Intel. Para esto, se utilizaron las instrucciones SSE de dicha arquitectura, que aprovechan el ya mencionado modelo SIMD para procesar datos en forma paralela.
 
-\subsection{Metodología de trabajo}
-Al disponer de las implementaciones en C de todos los filtros, se procedió a realizar su implementación en lenguaje ensamblador para la arquitectura x86-64 de Intel. Para esto, se utilizaron las instrucciones SSE de dicha arquitectura, que aprovechan el ya mencionado modelo SIMD para procesar datos en forma paralela.
+% Una vez realizadas estas implementaciones, fueron sometidas a un proceso de comparación para extraer conclusiones acerca de su rendimiento. Con este fin, se experimentó con variaciones tanto en los datos de entrada como en detalles implementativos de los mismos algoritmos. De esta manera, se pudo recopilar datos sobre el comportamiento de cada implementación, y contrastar estos resultados con diversas hipótesis previamente elaboradas.
 
-Una vez realizadas estas implementaciones, fueron sometidas a un proceso de comparación para extraer conclusiones acerca de su rendimiento. Con este fin, se experimentó con variaciones tanto en los datos de entrada como en detalles implementativos de los mismos algoritmos. De esta manera, se pudo recopilar datos sobre el comportamiento de cada implementación, y contrastar estos resultados con diversas hipótesis previamente elaboradas.
-
-A continuación introducimos los filtros y sus respectivas implementaciones, luego describimos los tests realizados y los resultados obtenidos, y finalmente a partir de estos datos otorgamos algunas conclusiones sobre la experiencia realizada.
+% A continuación introducimos los filtros y sus respectivas implementaciones, luego describimos los tests realizados y los resultados obtenidos, y finalmente a partir de estos datos otorgamos algunas conclusiones sobre la experiencia realizada.
