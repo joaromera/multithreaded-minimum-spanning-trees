@@ -412,7 +412,10 @@ void mstParalelo(Grafo *g, int cantThreads) {
 
 //Reinicia la experimentación.
 void resetExperimentacion() {
-   // TO DO 
+    threadData.clear();
+    pthread_id.clear();
+    colores.reset(0);
+    thread_counter = 0;
 }
 
 //Procedimiento para realizar las pruebas o test mínimo de la cátedra.
@@ -448,6 +451,7 @@ void experimentacion() {
                 if (k == 0) {
                     grafo = "arbol";
                     auto start = std::chrono::steady_clock::now();
+                    mstParalelo(&g, 1);
                     auto end = std::chrono::steady_clock::now();
 
                     std::cout << instancia << "," << n << "," << grafo << "," << 1 << ","
@@ -460,6 +464,7 @@ void experimentacion() {
                 if (k == 1) {
                     grafo = "ralo";
                     auto start = std::chrono::steady_clock::now();
+                    mstParalelo(&g, 1);
                     auto end = std::chrono::steady_clock::now();
 
                     std::cout << instancia << "," << n << "," << grafo << "," << 1 << ","
@@ -472,6 +477,7 @@ void experimentacion() {
                 if (k == 2) {
                     grafo = "completo";
                     auto start = std::chrono::steady_clock::now();
+                    mstParalelo(&g, 1);
                     auto end = std::chrono::steady_clock::now();
 
                     std::cout << instancia << "," << n << "," << grafo << "," << 1 << ","

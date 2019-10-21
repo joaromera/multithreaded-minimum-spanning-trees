@@ -4,6 +4,8 @@
 
 
 int Grafo::inicializar(string nombreArchivo) {
+  numVertices = 0;
+  numEjes = 0;
 
   ifstream archivo;
   archivo.open(nombreArchivo.c_str());
