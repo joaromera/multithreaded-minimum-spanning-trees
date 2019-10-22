@@ -8,8 +8,7 @@ En este trabajo se propone una solución para resolver el problema de encontrar 
 %   \end{tabular}
 %  \end{center}
 
-% \subsection{Objetivos Generales}
-% Además de la exploración del modelo SIMD se repasaron conceptos y técnicas de programación vectorizada en C y ASM dentro del campo de aplicación del procesamiento de imágenes. Para esto se llevó a cabo la implementación de los siguientes filtros:
+\subsection{AGM}
 
 % \begin{center}
 %  \begin{tabular}{cccc}
@@ -24,9 +23,4 @@ En este trabajo se propone una solución para resolver el problema de encontrar 
 %  \end{tabular}
 % \end{center}
 
-% \subsection{Metodología de trabajo}
-% Al disponer de las implementaciones en C de todos los filtros, se procedió a realizar su implementación en lenguaje ensamblador para la arquitectura x86-64 de Intel. Para esto, se utilizaron las instrucciones SSE de dicha arquitectura, que aprovechan el ya mencionado modelo SIMD para procesar datos en forma paralela.
-
-% Una vez realizadas estas implementaciones, fueron sometidas a un proceso de comparación para extraer conclusiones acerca de su rendimiento. Con este fin, se experimentó con variaciones tanto en los datos de entrada como en detalles implementativos de los mismos algoritmos. De esta manera, se pudo recopilar datos sobre el comportamiento de cada implementación, y contrastar estos resultados con diversas hipótesis previamente elaboradas.
-
-% A continuación introducimos los filtros y sus respectivas implementaciones, luego describimos los tests realizados y los resultados obtenidos, y finalmente a partir de estos datos otorgamos algunas conclusiones sobre la experiencia realizada.
+\subsection{Programación paralela y Pthreads}
