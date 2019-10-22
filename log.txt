@@ -1,111 +1,83 @@
-[36;1m7ff43f426780: [0minicializando thread.
-[36;1m7ff43f426780: [0mfin init thread.
-[36;1m7ff43f426780: [0minicializando thread.
-[36;1m7ff43f426780: [0mfin init thread.
-[36;1m7ff43f426780: [0minicializando thread.
-[36;1m7ff43f426780: [0mfin init thread.
-[36;1m7ff43f426780: [0minicializando thread.
-[36;1m7ff43f426780: [0mfin init thread.
-[32;1m7ff43cc07700: [0mComienza thread 0.
-[32;1m7ff43cc07700: [0mVuelve inicio del while.
-[32;1m7ff43cc07700: [0mAtendiendo pedidos de fusion si los hay..
-[32;1m7ff43cc07700: [0mthread_attend_fusion_requests: atendiendo..
-[32;1m7ff43cc07700: [0mthread_attend_fusion_requests: se termino de atender..
-[32;1m7ff43cc07700: [0mlisto atendiendo pedidos de fusion..
-[32;1m7ff43cc07700: [0mBuscando nodo mas cercano.
-[32;1m7ff43cc07700: [0mbuscarNodo: buscando el primer nodo del trhead.
-[32;1m7ff43cc07700: [0mobtuve prox eje, (0, 0).
-[32;1m7ff43cc07700: [0mNodo fue capturado. Agregando a mi AGM.
-[32;1m7ff43cc07700: [0madd_ejes_alcanzables: Cola de prioridad es [ (0,2,1) (0,1,2) ].
-[32;1m7ff43cc07700: [0mSe termino de pintar el nodo libre 0.
-[32;1m7ff43cc07700: [0mVuelve inicio del while.
-[32;1m7ff43cc07700: [0mAtendiendo pedidos de fusion si los hay..
-[32;1m7ff43cc07700: [0mthread_attend_fusion_requests: atendiendo..
-[32;1m7ff43cc07700: [0mthread_attend_fusion_requests: se termino de atender..
-[32;1m7ff43cc07700: [0mlisto atendiendo pedidos de fusion..
-[32;1m7ff43cc07700: [0mBuscando nodo mas cercano.
-[32;1m7ff43cc07700: [0mbuscarNodo: Va a devolver el nodo alcanzable mas cercano..
-[32;1m7ff43cc07700: [0mbuscarNodo: probando eje (0, 2).
-[32;1m7ff43cc07700: [0mViendo si 0 es dueño de 2.
-[32;1m7ff43cc07700: [0mpude ver si 0 es dueño de 2.
-[32;1m7ff43cc07700: [0mobtuve prox eje, (0, 2).
-[32;1m7ff43cc07700: [0mNodo fue capturado. Agregando a mi AGM.
-[32;1m7ff43cc07700: [0madd_ejes_alcanzables: Cola de prioridad es [ (0,2,1) (2,0,1) (0,1,2) (2,1,10) ].
-[32;1m7ff43cc07700: [0mSe termino de pintar el nodo libre 2.
-[32;1m7ff43cc07700: [0mVuelve inicio del while.
-[32;1m7ff43cc07700: [0mAtendiendo pedidos de fusion si los hay..
-[32;1m7ff43cc07700: [0mthread_attend_fusion_requests: atendiendo..
-[32;1m7ff43cc07700: [0mthread_attend_fusion_requests: se termino de atender..
-[32;1m7ff43cc07700: [0mlisto atendiendo pedidos de fusion..
-[32;1m7ff43cc07700: [0mBuscando nodo mas cercano.
-[32;1m7ff43cc07700: [0mbuscarNodo: Va a devolver el nodo alcanzable mas cercano..
-[32;1m7ff43cc07700: [0mbuscarNodo: probando eje (0, 2).
-[32;1m7ff43cc07700: [0mViendo si 0 es dueño de 2.
-[32;1m7ff43cc07700: [0mpude ver si 0 es dueño de 2.
-[32;1m7ff43cc07700: [0mbuscarNodo: probando eje (2, 0).
-[32;1m7ff43cc07700: [0mViendo si 0 es dueño de 0.
-[32;1m7ff43cc07700: [0mpude ver si 0 es dueño de 0.
-[32;1m7ff43cc07700: [0mbuscarNodo: probando eje (0, 1).
-[32;1m7ff43cc07700: [0mViendo si 0 es dueño de 1.
-[32;1m7ff43cc07700: [0mpude ver si 0 es dueño de 1.
-[32;1m7ff43cc07700: [0mobtuve prox eje, (0, 1).
-[32;1m7ff43cc07700: [0mNodo fue capturado. Agregando a mi AGM.
-[32;1m7ff43cc07700: [0madd_ejes_alcanzables: Cola de prioridad es [ (0,1,2) (1,0,2) (2,1,10) (1,2,10) ].
-[32;1m7ff43cc07700: [0mSe termino de pintar el nodo libre 1.
-[32;1m7ff43cc07700: [0mVuelve inicio del while.
-[32;1m7ff43cc07700: [0mAtendiendo pedidos de fusion si los hay..
-[32;1m7ff43cc07700: [0mthread_attend_fusion_requests: atendiendo..
-[32;1m7ff43cc07700: [0mthread_attend_fusion_requests: se termino de atender..
-[32;1m7ff43cc07700: [0mlisto atendiendo pedidos de fusion..
-[32;1m7ff43cc07700: [0mBuscando nodo mas cercano.
-[32;1m7ff43cc07700: [0mbuscarNodo: Va a devolver el nodo alcanzable mas cercano..
-[32;1m7ff43cc07700: [0mbuscarNodo: probando eje (0, 1).
-[32;1m7ff43cc07700: [0mViendo si 0 es dueño de 1.
-[32;1m7ff43cc07700: [0mpude ver si 0 es dueño de 1.
-[32;1m7ff43cc07700: [0mbuscarNodo: probando eje (1, 0).
-[32;1m7ff43cc07700: [0mViendo si 0 es dueño de 0.
-[32;1m7ff43cc07700: [0mpude ver si 0 es dueño de 0.
-[32;1m7ff43cc07700: [0mbuscarNodo: probando eje (2, 1).
-[32;1m7ff43cc07700: [0mViendo si 0 es dueño de 1.
-[32;1m7ff43cc07700: [0mpude ver si 0 es dueño de 1.
-[32;1m7ff43cc07700: [0mbuscarNodo: probando eje (1, 2).
-[32;1m7ff43cc07700: [0mViendo si 0 es dueño de 2.
-[32;1m7ff43cc07700: [0mpude ver si 0 es dueño de 2.
-[32;1m7ff43cc07700: [0mAGM completo!.
-[32;1m7ff43cc07700: [0mAGM listo!.
-[37;1m7ff43d408700: [0mComienza thread 1.
-[37;1m7ff43d408700: [0mVuelve inicio del while.
-[37;1m7ff43d408700: [0mAtendiendo pedidos de fusion si los hay..
-[37;1m7ff43d408700: [0mthread_attend_fusion_requests: atendiendo..
-[37;1m7ff43d408700: [0mthread_attend_fusion_requests: se termino de atender..
-[37;1m7ff43d408700: [0mlisto atendiendo pedidos de fusion..
-[37;1m7ff43d408700: [0mBuscando nodo mas cercano.
-[37;1m7ff43d408700: [0mbuscarNodo: buscando el primer nodo del trhead.
-[37;1m7ff43d408700: [0mTerminando proceso. ya no hay nodos disponibles.
-[37;1m7ff43d408700: [0mLimpiando mi cola de fusiones.
-[37;1m7ff43d408700: [0mthread_attend_fusion_requests: atendiendo..
-[37;1m7ff43d408700: [0mthread_attend_fusion_requests: se termino de atender..
-[35;1m7ff43dc09700: [0mComienza thread 2.
-[35;1m7ff43dc09700: [0mVuelve inicio del while.
-[35;1m7ff43dc09700: [0mAtendiendo pedidos de fusion si los hay..
-[35;1m7ff43dc09700: [0mthread_attend_fusion_requests: atendiendo..
-[35;1m7ff43dc09700: [0mthread_attend_fusion_requests: se termino de atender..
-[35;1m7ff43dc09700: [0mlisto atendiendo pedidos de fusion..
-[35;1m7ff43dc09700: [0mBuscando nodo mas cercano.
-[35;1m7ff43dc09700: [0mbuscarNodo: buscando el primer nodo del trhead.
-[35;1m7ff43dc09700: [0mTerminando proceso. ya no hay nodos disponibles.
-[35;1m7ff43dc09700: [0mLimpiando mi cola de fusiones.
-[35;1m7ff43dc09700: [0mthread_attend_fusion_requests: atendiendo..
-[35;1m7ff43dc09700: [0mthread_attend_fusion_requests: se termino de atender..
-[33;1m7ff43e40a700: [0mComienza thread 3.
-[33;1m7ff43e40a700: [0mVuelve inicio del while.
-[33;1m7ff43e40a700: [0mAtendiendo pedidos de fusion si los hay..
-[33;1m7ff43e40a700: [0mthread_attend_fusion_requests: atendiendo..
-[33;1m7ff43e40a700: [0mthread_attend_fusion_requests: se termino de atender..
-[33;1m7ff43e40a700: [0mlisto atendiendo pedidos de fusion..
-[33;1m7ff43e40a700: [0mBuscando nodo mas cercano.
-[33;1m7ff43e40a700: [0mbuscarNodo: buscando el primer nodo del trhead.
-[33;1m7ff43e40a700: [0mTerminando proceso. ya no hay nodos disponibles.
-[33;1m7ff43e40a700: [0mLimpiando mi cola de fusiones.
-[33;1m7ff43e40a700: [0mthread_attend_fusion_requests: atendiendo..
-[33;1m7ff43e40a700: [0mthread_attend_fusion_requests: se termino de atender..
+[34;1m7f0c891ae780: [0minicializando thread.
+[34;1m7f0c891ae780: [0mfin init thread.
+[34;1m7f0c891ae780: [0minicializando thread.
+[34;1m7f0c891ae780: [0mfin init thread.
+[34;1m7f0c891ae780: [0minicializando thread.
+[34;1m7f0c891ae780: [0mfin init thread.
+[34;1m7f0c891ae780: [0minicializando thread.
+[34;1m7f0c891ae780: [0mfin init thread.
+[37;1m7f0c8698f700: [0mComienza thread 0.
+[37;1m7f0c8698f700: [0mthread_attend_fusion_requests: atendiendo..
+[37;1m7f0c8698f700: [0mthread_attend_fusion_requests: se termino de atender..
+[37;1m7f0c8698f700: [0mbuscarNodo: buscando el primer nodo del trhead.
+[37;1m7f0c8698f700: [0mobtuve prox eje, (0, 0).
+[37;1m7f0c8698f700: [0mNodo fue capturado. Agregando a mi AGM.
+[37;1m7f0c8698f700: [0madd_ejes_alcanzables: Cola de prioridad es [ (0,2,1) (0,1,2) ].
+[37;1m7f0c8698f700: [0mSe termino de pintar el nodo libre 0.
+[37;1m7f0c8698f700: [0mthread_attend_fusion_requests: atendiendo..
+[37;1m7f0c8698f700: [0mthread_attend_fusion_requests: se termino de atender..
+[37;1m7f0c8698f700: [0mbuscarNodo: Va a devolver el nodo alcanzable mas cercano..
+[37;1m7f0c8698f700: [0mbuscarNodo: probando eje (0, 2).
+[37;1m7f0c8698f700: [0mViendo si 0 es dueño de 2.
+[37;1m7f0c8698f700: [0mpude ver si 0 es dueño de 2.
+[37;1m7f0c8698f700: [0mobtuve prox eje, (0, 2).
+[37;1m7f0c8698f700: [0mNodo fue capturado. Agregando a mi AGM.
+[37;1m7f0c8698f700: [0madd_ejes_alcanzables: Cola de prioridad es [ (0,2,1) (2,0,1) (0,1,2) (2,1,10) ].
+[37;1m7f0c8698f700: [0mSe termino de pintar el nodo libre 2.
+[37;1m7f0c8698f700: [0mthread_attend_fusion_requests: atendiendo..
+[37;1m7f0c8698f700: [0mthread_attend_fusion_requests: se termino de atender..
+[37;1m7f0c8698f700: [0mbuscarNodo: Va a devolver el nodo alcanzable mas cercano..
+[37;1m7f0c8698f700: [0mbuscarNodo: probando eje (0, 2).
+[37;1m7f0c8698f700: [0mViendo si 0 es dueño de 2.
+[37;1m7f0c8698f700: [0mpude ver si 0 es dueño de 2.
+[37;1m7f0c8698f700: [0mbuscarNodo: probando eje (2, 0).
+[37;1m7f0c8698f700: [0mViendo si 0 es dueño de 0.
+[37;1m7f0c8698f700: [0mpude ver si 0 es dueño de 0.
+[37;1m7f0c8698f700: [0mbuscarNodo: probando eje (0, 1).
+[37;1m7f0c8698f700: [0mViendo si 0 es dueño de 1.
+[37;1m7f0c8698f700: [0mpude ver si 0 es dueño de 1.
+[37;1m7f0c8698f700: [0mobtuve prox eje, (0, 1).
+[37;1m7f0c8698f700: [0mNodo fue capturado. Agregando a mi AGM.
+[37;1m7f0c8698f700: [0madd_ejes_alcanzables: Cola de prioridad es [ (0,1,2) (1,0,2) (2,1,10) (1,2,10) ].
+[37;1m7f0c8698f700: [0mSe termino de pintar el nodo libre 1.
+[37;1m7f0c8698f700: [0mthread_attend_fusion_requests: atendiendo..
+[37;1m7f0c8698f700: [0mthread_attend_fusion_requests: se termino de atender..
+[37;1m7f0c8698f700: [0mbuscarNodo: Va a devolver el nodo alcanzable mas cercano..
+[37;1m7f0c8698f700: [0mbuscarNodo: probando eje (0, 1).
+[37;1m7f0c8698f700: [0mViendo si 0 es dueño de 1.
+[37;1m7f0c8698f700: [0mpude ver si 0 es dueño de 1.
+[37;1m7f0c8698f700: [0mbuscarNodo: probando eje (1, 0).
+[37;1m7f0c8698f700: [0mViendo si 0 es dueño de 0.
+[37;1m7f0c8698f700: [0mpude ver si 0 es dueño de 0.
+[37;1m7f0c8698f700: [0mbuscarNodo: probando eje (2, 1).
+[37;1m7f0c8698f700: [0mViendo si 0 es dueño de 1.
+[37;1m7f0c8698f700: [0mpude ver si 0 es dueño de 1.
+[37;1m7f0c8698f700: [0mbuscarNodo: probando eje (1, 2).
+[37;1m7f0c8698f700: [0mViendo si 0 es dueño de 2.
+[37;1m7f0c8698f700: [0mpude ver si 0 es dueño de 2.
+[37;1m7f0c8698f700: [0mAGM completo!.
+[37;1m7f0c8698f700: [0mAGM listo!.
+[35;1m7f0c87190700: [0mComienza thread 1.
+[35;1m7f0c87190700: [0mthread_attend_fusion_requests: atendiendo..
+[35;1m7f0c87190700: [0mthread_attend_fusion_requests: se termino de atender..
+[35;1m7f0c87190700: [0mbuscarNodo: buscando el primer nodo del trhead.
+[35;1m7f0c87190700: [0mTerminando proceso. ya no hay nodos disponibles.
+[35;1m7f0c87190700: [0mLimpiando mi cola de fusiones.
+[35;1m7f0c87190700: [0mthread_attend_fusion_requests: atendiendo..
+[35;1m7f0c87190700: [0mthread_attend_fusion_requests: se termino de atender..
+[33;1m7f0c87991700: [0mComienza thread 2.
+[33;1m7f0c87991700: [0mthread_attend_fusion_requests: atendiendo..
+[33;1m7f0c87991700: [0mthread_attend_fusion_requests: se termino de atender..
+[33;1m7f0c87991700: [0mbuscarNodo: buscando el primer nodo del trhead.
+[33;1m7f0c87991700: [0mTerminando proceso. ya no hay nodos disponibles.
+[33;1m7f0c87991700: [0mLimpiando mi cola de fusiones.
+[33;1m7f0c87991700: [0mthread_attend_fusion_requests: atendiendo..
+[33;1m7f0c87991700: [0mthread_attend_fusion_requests: se termino de atender..
+[31;1m7f0c88192700: [0mComienza thread 3.
+[31;1m7f0c88192700: [0mthread_attend_fusion_requests: atendiendo..
+[31;1m7f0c88192700: [0mthread_attend_fusion_requests: se termino de atender..
+[31;1m7f0c88192700: [0mbuscarNodo: buscando el primer nodo del trhead.
+[31;1m7f0c88192700: [0mTerminando proceso. ya no hay nodos disponibles.
+[31;1m7f0c88192700: [0mLimpiando mi cola de fusiones.
+[31;1m7f0c88192700: [0mthread_attend_fusion_requests: atendiendo..
+[31;1m7f0c88192700: [0mthread_attend_fusion_requests: se termino de atender..

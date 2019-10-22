@@ -16,6 +16,17 @@ Thread::Thread()
     log("fin init thread");
 }
 
+void Thread::add_ejes_alcanzables(Grafo *g, const int nodo)
+{
+    std::for_each(g->vecinosBegin(nodo), g->vecinosEnd(nodo),
+                  [&](const Eje &e) {
+                      ejesVecinos.addEje(e);
+                  });
+
+    log("add_ejes_alcanzables: Cola de prioridad es %s",
+        ejesVecinos.toString().c_str());
+}
+
 void Thread::reset(size_t nVertices)
 {
     // Inicializa AGM vacio.

@@ -14,6 +14,7 @@
 #include "cola_prioridad.h"
 #include "colores.h"
 #include "experimentacion.h"
+#include "fusiones.h"
 #include "globales.h"
 #include "grafo.h"
 #include "log.h"
@@ -65,83 +66,6 @@ StatusBuscarNodo buscarNodo(int thread, Eje &out) {
     }
 }
 
-//Reinicia las estructuras de un thread.
-void reiniciarThread(int thread, Grafo* g) {
-    threadData[thread].reset(g->numVertices);
-}
-
-// Iniciar un thread.
-int initThread(Grafo *g) {
-    int thread = thread_counter++;
-    reiniciarThread(thread, g);
-    return thread;
-}
-
-void add_ejes_alcanzables(const id_thread thread, Grafo* g, const int nodo) {
-
-    ColaDePrioridad &cola = threadData[thread].ejesVecinos;
-    std::for_each(g->vecinosBegin(nodo), g->vecinosEnd(nodo),
-        [&](const Eje &e){
-            cola.addEje(e);
-        });
-
-    log("add_ejes_alcanzables: Cola de prioridad es %s",
-            threadData[thread].ejesVecinos.toString().c_str());
-
-}
-
-void fuse_agm(Grafo &g1, Grafo &g2) {
-    for (int i = 0; i < g1.numVertices; i++) {
-        log("fuse_agm: pasando ejes del nodo %d", i);
-        for (auto &e : g2.listaDeAdyacencias[i]) {
-            g1.listaDeAdyacencias[i].push_back(e);
-        }
-    }
-    g1.numEjes += g2.numEjes;
-
-    // Reiniciar g2
-}
-
-void fuse(const int tid1, const int tid2, const int nodo1, const int nodo2) {
-
-    assert(tid1 < tid2);
-    assert(colores.esDueno(nodo1, tid1));
-    assert(colores.esDueno(nodo2, tid2));
-
-    log("fuse: iniciando fusion %d->%d sobre (%d, %d)",
-        tid1, tid2, nodo1, nodo2);
-
-    log("fuse: pasando nodos de %d a %d", tid2, tid1);
-    colores.fusionarThreads(tid1, tid2);
-    log("fuse: pasando AGM de %d a %d", tid2, tid1);
-    fuse_agm(threadData[tid1].agm, threadData[tid2].agm);
-    log("fuse: añadiendo (%d, %d) al AGM", nodo1, nodo2);
-    // FIXME
-    log("fuse: volcando cola de prioridad %d a %d", tid2, tid1);
-    threadData[tid1].ejesVecinos.fusionar(threadData[tid2].ejesVecinos);
-    log("fuse: reiniciando thread %d", tid2);
-    threadData[tid2].reset(threadData[tid1].agm.numVertices);
-    log("fuse: finish");
-
-}
-
-/** Atender pedidos de fusion entreantes a un thread `tid`.
- *
- * Al terminar, el mutex `fusion_req` de este thread quedará cerrado, por lo
- * que deberá desbloquearse si se decea que el thread pueda seguir recibiendo
- * pedidos de fusión. */
-void thread_attend_fusion_requests(int tid) {
-    log("thread_attend_fusion_requests: atendiendo.", tid);
-    // Mientras exista un fusion_req entrante, 
-    while ( pthread_mutex_trylock(&threadData[tid].fusion_req) ) {
-        log("thread_attend_fusion_requests: Dando ack.", tid);
-        pthread_mutex_unlock(&threadData[tid].fusion_ack);
-        pthread_mutex_lock(&threadData[tid].fusion_ready);
-        log("thread_attend_fusion_requests: Recibido el fusion_ready.", tid);
-    }
-    log("thread_attend_fusion_requests: se termino de atender.", tid);
-}
-
 // Gestión principal del thread. Contiene el ciclo que le permite a cada thread hacer sus funciones.
 void* mstParaleloThread(void *p) {
 
@@ -149,7 +73,8 @@ void* mstParaleloThread(void *p) {
     Grafo* g = (Grafo*) p;
 
     // Se obtiene el numero de thread y se inicializan sus estructuras
-    id_thread this_thread_id = initThread(g);
+    int this_thread_id = thread_counter++;
+    threadData[this_thread_id].reset(g->numVertices);
 
     Eje eje_actual;
 
@@ -157,22 +82,11 @@ void* mstParaleloThread(void *p) {
 
     // Ciclo principal de cada thread
     while(true){
-
-        log("Vuelve inicio del while");
-
-        // Si otro thread esta en la cola de fusiones de este thread lo
-        // notifica que puede fusionarse.
-
-        // FIXME nadie me esta pidiendo 
-        log("Atendiendo pedidos de fusion si los hay.");
+        // Atiendo pedidos de fusion recibidos y libero el mutex para poder recibir mas
         thread_attend_fusion_requests(this_thread_id);
-        log("listo atendiendo pedidos de fusion.");
         pthread_mutex_unlock(&threadData[this_thread_id].fusion_req);
 
-        log("Buscando nodo mas cercano");
-
-        // Se busca el nodo más cercano que no esté en el árbol, pero que sea
-        // alcanzable
+        // Busco nodo libre
         StatusBuscarNodo status = buscarNodo(this_thread_id, eje_actual);
         if (status == NoHayNodosDisponibles) {
             log("Terminando proceso. ya no hay nodos disponibles");
@@ -216,7 +130,7 @@ void* mstParaleloThread(void *p) {
 
             // Se añaden a la cola de prioridad, los ejes alcanzables por el
             // nuevo nodo.
-            add_ejes_alcanzables(this_thread_id, g, hijo);
+            threadData[this_thread_id].add_ejes_alcanzables(g, hijo);
 
             // Quita el eje de la cola de prioridad
             // threadData[this_thread_id].ejesVecinos.pop();
@@ -287,12 +201,11 @@ void* mstParaleloThread(void *p) {
 }
 
 void mstParalelo(Grafo *g, int cantThreads) {
-    // Verificar cantidad de threads para ejecutar el algoritmo
+
     if (cantThreads < 1) {
         cerr << "El número de threads debe ser igual o mayor a 1" << endl;
     }
 
-    // Si el numero de vertices del grafo es 0, imprimir el grafo vacio
     if (g->numVertices == 0) {
         if (imprimirResultado) {
             cout << endl << "********** RESULTADO *********** " << endl;
@@ -301,17 +214,13 @@ void mstParalelo(Grafo *g, int cantThreads) {
         return;
     }
 
-    // Se inicializan las estructuras globales
-
+    // Se inicializan las estructuras globales segun cant threads
     pthread_id.resize(cantThreads); // pthread_id de c/u thread.
     threadData.resize(cantThreads); // Data interna de c/u thread.
-    // Cada nodo empieza sin dueño
-    colores.reset(g->numVertices);
-
+    colores.reset(g->numVertices); // Cada nodo empieza sin dueño
 
     // Inicializa cada uno de los threads.
     for (int i = 0; i < cantThreads; ++i) {
-        // Inicializa un thread corriendo `mstParaleloThread(g)`.
         pthread_create(&pthread_id[i], NULL, mstParaleloThread, (void*) g);
     }
 

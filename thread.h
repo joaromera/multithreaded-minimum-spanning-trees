@@ -1,5 +1,6 @@
 #pragma once
 
+#include <algorithm>
 #include "grafo.h"
 #include "log.h"
 #include "cola_prioridad.h"
@@ -34,6 +35,8 @@ struct Thread
     // Constructor nulo. Cada thread se encarga de inicializar el estado
     // correspondiente pasandole el grafo como parámetro.
     Thread();
+
+    void add_ejes_alcanzables(Grafo *g, const int nodo);
 
     /** Reinicia el estado interno del thread.
      * Se llama al inicializar o luego de fusionar. Esta función existe pues se
