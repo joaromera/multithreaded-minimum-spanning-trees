@@ -24,7 +24,6 @@ void log_init() {
 
 }
 
-
 void log(const char * format, ...) {
     pthread_mutex_lock(&log_mutex);
 

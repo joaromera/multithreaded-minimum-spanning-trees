@@ -1,115 +1,27 @@
-#include "grafo.h"
-#include <vector>
+#include <algorithm>
+#include <atomic>
+#include <cassert>
+#include <chrono>
+#include <limits>
+#include <pthread.h>
+#include <queue>
+#include <semaphore.h>
+#include <stack>
 #include <stdlib.h>
 #include <time.h>
-#include <algorithm>
-#include <limits>
-#include <stack>
-#include <atomic>
-#include <queue>
-#include <pthread.h>
-#include <semaphore.h>
-#include <chrono>
-#include "lista_de_colores.h"
+#include <vector>
+
 #include "cola_prioridad.h"
 #include "colores.h"
+#include "experimentacion.h"
+#include "globales.h"
+#include "grafo.h"
 #include "log.h"
-#include <cassert>
+#include "thread.h"
 
 using namespace std;
 
 using id_thread = int32_t;
-
-// Estructura para los datos básicos de un thread.
-struct ThreadInfo {
-    int thread; // Número de thread.
-    int threadId; // ID del thread.
-
-    ThreadInfo() : thread(-1), threadId(-1) {}
-
-    ThreadInfo(const int thread, const int threadId)
-        : thread(thread), threadId(threadId) {}
-};
-
-// Datos para agregar a la cola de fusiones de cada thread.
-struct FusionInfo {
-    int thread;  // thread que se debe fusionar
-
-    // El eje o arista a agregar:
-    int fromNode;
-    int toNode;
-    int weight;
-};
-
-struct Thread {
-    // TO DO
-    // Estructura que debe contener los colores de los vértices (actual y vecinos).
-    // Las distancias, el árbol, y la herramientas de sincronización necesarias
-    // para evitar race conditions y deadlocks.
-    Grafo agm;
-
-    // Cola de prioridad para obtener el eje alcanzable mas corto.
-    ColaDePrioridad ejesVecinos;
-
-    pthread_mutex_t fusion_req; // Me bloquea para fusionarme
-    pthread_mutex_t fusion_ack; // Acepto la fusion de quien tenga mi `lock`
-    pthread_mutex_t fusion_ready; // Terminaron de fusionarme
-
-    // Constructor nulo. Cada thread se encarga de inicializar el estado
-    // correspondiente pasandole el grafo como parámetro.
-    Thread() {
-        log("inicializando thread");
-        pthread_mutex_init(&fusion_req, NULL);
-        pthread_mutex_init(&fusion_ack, NULL);
-        pthread_mutex_trylock(&fusion_ack);
-        pthread_mutex_init(&fusion_ready, NULL);
-        pthread_mutex_trylock(&fusion_ready);
-        log("fin init thread");
-    };
-
-    /** Reinicia el estado interno del thread.
-     *
-     * Se llama al inicializar o luego de fusionar. Esta función existe pues se
-     * necesita el constructor nulo para inicializar el vector<ThreadInfo>,
-     * pero se requiere tambien saber la cantidad de vertices en el grafo
-     */
-    void reset(size_t nVertices) {
-
-        // Inicializa AGM vacio.
-        agm = Grafo();
-        for (size_t i = 0; i < nVertices; ++i) { agm.insertarNodo(i); }
-
-        // Reinicia 
-        ejesVecinos.reset();
-
-    }
-
-};
-
-// -----------------------------------------------------------------------------
-// Variables globales
-// -----------------------------------------------------------------------------
-
-
-// Imprimir el grafo resultado durante los experimentos
-bool imprimirResultado = true;
-
-// Se sugieren usar variables (unas atómicas y otras no) para:
-
-// Contener el estado global de la estructura de threads.
-std::vector<Thread> threadData;
-
-// Para coordinar el número de cada thread durante la inizializacion de threads.
-atomic<int> thread_counter {0};
-
-// Para para coordinar el id de cada thread durante la inizializacion y
-// reinicializacion de threads.
-std::vector<pthread_t> pthread_id;
-
-// Estructura atomica que registra los colores de los nodos.
-Colores colores;
-
-// Para contener la estructura global que indica el estado actual de cada nodo. 
 
 // -----------------------------------------------------------------------------
 // Funciones
@@ -117,8 +29,9 @@ Colores colores;
 
 enum StatusBuscarNodo { Ok, AgmCompleto, NoHayNodosDisponibles };
 
-// Retorna el nodo alcanzable a menor distancia. Si el thread todavia no tiene
-// nodos, busca un nodo libre
+// Retorna el nodo alcanzable a menor distancia.
+// Si el thread todavia no tiene nodos, busca uno libre.
+// Si no hay nodos libres, avisa para luego terminar.
 StatusBuscarNodo buscarNodo(int thread, Eje &out) {
 
     if ( threadData[thread].ejesVecinos.empty() ) {
@@ -163,7 +76,6 @@ int initThread(Grafo *g) {
     reiniciarThread(thread, g);
     return thread;
 }
-
 
 void add_ejes_alcanzables(const id_thread thread, Grafo* g, const int nodo) {
 
@@ -407,128 +319,6 @@ void mstParalelo(Grafo *g, int cantThreads) {
     // importa.
     for (int i = 0; i < cantThreads; ++i) {
         pthread_join(pthread_id[i], NULL);
-    }
-}
-
-//Reinicia la experimentación.
-void resetExperimentacion() {
-    threadData.clear();
-    pthread_id.clear();
-    colores.reset(0);
-    thread_counter = 0;
-}
-
-//Procedimiento para realizar las pruebas o test mínimo de la cátedra.
-void experimentacion() {
-    imprimirResultado = false;
-    cout << "instancia,n,grafo,threads, tiempo" << endl;
-    int instancia = 0;
-    string grafo;
-
-    for (int n = 100; n <= 1000; n += 100) {
-        for (int k = 0; k <= 2; k++) {
-            Grafo g;
-            if (k == 0) {
-                if (g.inicializar("test/experimentacion/arbol/arbol" + to_string(n) +".txt") != 1) {
-                    cerr << "No se pudo cargar el grafo correctamente" << endl;
-                    return;
-                }
-            }
-            if (k == 1) {
-                if (g.inicializar("test/experimentacion/ralo/ralo" + to_string(n) + ".txt") != 1) {
-                    cerr << "No se pudo cargar el grafo correctamente" << endl;
-                    return;
-                }
-            }
-            if (k == 2) {
-                if (g.inicializar("test/experimentacion/completo/completo" + to_string(n) + ".txt") != 1) {
-                    cerr << "No se pudo cargar el grafo correctamente" << endl;
-                    return;
-                }
-            }
-
-            for (int i = 0; i < 10; i++) {
-                if (k == 0) {
-                    grafo = "arbol";
-                    auto start = std::chrono::steady_clock::now();
-                    mstParalelo(&g, 1);
-                    auto end = std::chrono::steady_clock::now();
-
-                    std::cout << instancia << "," << n << "," << grafo << "," << 1 << ","
-                              << std::chrono::duration <double, std::milli> (end-start).count()
-                              << std::endl;
-                    instancia++;
-                    resetExperimentacion();
-                }
-
-                if (k == 1) {
-                    grafo = "ralo";
-                    auto start = std::chrono::steady_clock::now();
-                    mstParalelo(&g, 1);
-                    auto end = std::chrono::steady_clock::now();
-
-                    std::cout << instancia << "," << n << "," << grafo << "," << 1 << ","
-                              << std::chrono::duration <double, std::milli> (end-start).count()
-                              << std::endl;
-                    instancia++;
-                    resetExperimentacion();
-                }
-
-                if (k == 2) {
-                    grafo = "completo";
-                    auto start = std::chrono::steady_clock::now();
-                    mstParalelo(&g, 1);
-                    auto end = std::chrono::steady_clock::now();
-
-                    std::cout << instancia << "," << n << "," << grafo << "," << 1 << ","
-                              << std::chrono::duration <double, std::milli> (end-start).count()
-                              << std::endl;
-                    instancia++;
-                    resetExperimentacion();
-                }
-
-                for (int threads = 2; threads <= 32; threads *= 2) {
-                    if (k == 0) {
-                        grafo = "arbol";
-                        auto start = std::chrono::steady_clock::now();
-                        mstParalelo(&g, threads);
-                        auto end = std::chrono::steady_clock::now();
-
-                        std::cout << instancia << "," << n << "," << grafo << "," << threads << ","
-                                  << std::chrono::duration <double, std::milli> (end-start).count()
-                                  << std::endl;
-                        instancia++;
-                        resetExperimentacion();
-                    }
-
-                    if (k == 1) {
-                        grafo = "ralo";
-                        auto start = std::chrono::steady_clock::now();
-                        mstParalelo(&g, threads);
-                        auto end = std::chrono::steady_clock::now();
-
-                        std::cout << instancia << "," << n << "," << grafo << "," << threads << ","
-                                  << std::chrono::duration <double, std::milli> (end-start).count()
-                                  << std::endl;
-                        instancia++;
-                        resetExperimentacion();
-                    }
-
-                    if (k == 2) {
-                        grafo = "completo";
-                        auto start = std::chrono::steady_clock::now();
-                        mstParalelo(&g, threads);
-                        auto end = std::chrono::steady_clock::now();
-
-                        std::cout << instancia << "," << n << "," << grafo << "," << threads << ","
-                                  << std::chrono::duration <double, std::milli> (end-start).count()
-                                  << std::endl;
-                        instancia++;
-                        resetExperimentacion();
-                    }
-                }
-            }
-        }
     }
 }
 

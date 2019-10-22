@@ -12,6 +12,9 @@
 
 using namespace std;
 
+/* Modificaciones realizadas:
+ * Se agrego el nodoOrigen y un constructor
+ */
 typedef struct Eje {
     int nodoOrigen;
     int nodoDestino;
@@ -26,9 +29,15 @@ typedef struct Eje {
 
 } Eje;
 
+/* Modificaciones realizadas:
+ * Se agrego un constructor por copia y los metodos
+ * insertarEje (con distintos argumentos), insertarNodo
+ * y getPeso.
+ */
 class Grafo {
 
 public:
+
   int numVertices;
   int numEjes;
 

@@ -25,18 +25,10 @@ private:
         }
     };
 
-    // -------------------------------------------------------------------------
-    // Datos internos
-    // -------------------------------------------------------------------------
-
     // Ejes alcanzables por el thread.
     std::priority_queue<Eje, vector<Eje>, GreaterEje> ejesVecinos;
 
 public:
-
-    // -------------------------------------------------------------------------
-    // Métodos publicos
-    // -------------------------------------------------------------------------
 
     /** Añade un eje a la cola de prioridad */
     void addEje(const Eje &e);
