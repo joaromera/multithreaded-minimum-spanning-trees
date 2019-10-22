@@ -40,3 +40,8 @@ TP1
 *.aux
 *.toc
 *.pdf
+
+# Logs
+log.txt
+nuestro.txt
+suyo.txt
