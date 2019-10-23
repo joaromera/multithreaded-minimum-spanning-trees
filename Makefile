@@ -1,27 +1,33 @@
 .PHONY: all clean
 
+SDIR = src
+ODIR = bin
+
 CC=g++
 CPP_STANDARD=c++11
 CFLAGS=-c -pthread -std=$(CPP_STANDARD) -ggdb
 LFLAGS=-pthread -std=$(CPP_STANDARD) -ggdb
 
-OBJS=thread.o grafo.o cola_prioridad.o colores.o log.o
+HEADERS = $(wildcard ${SDIR}/*.h) $(wildcard ${SDIR}/*.hpp)
+OBJS = $(patsubst ${SDIR}/%.cpp,${ODIR}/%.o,$(wildcard ${SDIR}/*.cpp))
 
 all: TP1
 
-%.o: %.cpp %.h
+${ODIR}/%.o: ${SDIR}/%.cpp
+	@mkdir -p ${ODIR}
 	$(CC) $(CFLAGS) -c -o $@ $<
 
-TP1: tp1_grafo.cpp $(OBJS)
-	$(CC) $(LFLAGS) $(OBJS) -o TP1 $<
+TP1: $(OBJS)
+	$(CC) $(LFLAGS) $(OBJS) -o TP1
 
 clean:
-	rm -f $(OBJS)
-	rm -f TP1
+	rm -rf ${ODIR} TP1
 
 # Usar esto para debugear vars de entorno en el makefile.
 .PHONY: print-makefile-vars
 print-makefile-vars:
+	@echo -e "ODIR         = $(ODIR)"
+	@echo -e "SDIR         = $(SDIR)"
 	@echo -e "CC           = $(CC)"
 	@echo -e "CPP_STANDARD = $(CPP_STANDARD)"
 	@echo -e "CFLAGS       = $(CFLAGS)"
