@@ -69,7 +69,8 @@ StatusBuscarNodo buscarNodo(int thread, Eje &out) {
 // Gestión principal del thread. Contiene el ciclo que le permite a cada thread hacer sus funciones.
 void* mstParaleloThread(void *p) {
 
-    // Grafo global (esto es para cambiar el tipo de void* a Grafo*)
+    // Grafo compartido entre todos los threads. No es necesario incluir
+    // mecanismos de sincronización, pues no lo modifican.
     Grafo* g = (Grafo*) p;
 
     // Se obtiene el numero de thread y se inicializan sus estructuras
