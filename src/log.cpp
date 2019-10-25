@@ -44,7 +44,7 @@ void log(const char * format, ...) {
 /** Funciones Auxiliares --------------------------------------------------- */
 
 void _set_thread_color(pthread_t tid) {
-    size_t i = tid % n_colors;
+    size_t i = (size_t) tid % n_colors;
     fprintf(fh, "%s", log_colors[i]);
 }
 
