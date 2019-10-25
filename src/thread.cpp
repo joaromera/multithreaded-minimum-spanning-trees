@@ -1,18 +1,14 @@
 #include "thread.h"
 
-ThreadInfo::ThreadInfo() : thread(-1), threadId(-1) {}
-
-ThreadInfo::ThreadInfo(const int thread, const int threadId)
-    : thread(thread), threadId(threadId) {}
-
 Thread::Thread()
 {
     pthread_mutex_init(&fusion_req, NULL);
+
     pthread_mutex_init(&fusion_ack, NULL);
     pthread_mutex_trylock(&fusion_ack);
+
     pthread_mutex_init(&fusion_ready, NULL);
     pthread_mutex_trylock(&fusion_ready);
-
 }
 
 void Thread::add_ejes_alcanzables(Grafo *g, const int nodo)

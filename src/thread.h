@@ -7,16 +7,6 @@
 
 using namespace std;
 
-// Estructura para los datos básicos de un thread.
-struct ThreadInfo
-{
-    int thread;   // Número de thread.
-    int threadId; // ID del thread.
-
-    ThreadInfo();
-    ThreadInfo(const int thread, const int threadId);
-};
-
 // Estructura que debe contener los colores de los vértices (actual y vecinos).
 // Las distancias, el árbol, y la herramientas de sincronización necesarias
 // para evitar race conditions y deadlocks.
@@ -40,7 +30,7 @@ struct Thread
 
     /** Reinicia el estado interno del thread.
      * Se llama al inicializar o luego de fusionar. Esta función existe pues se
-     * necesita el constructor nulo para inicializar el vector<ThreadInfo>,
+     * necesita el constructor nulo para inicializar el vector<Thread>,
      * pero se requiere tambien saber la cantidad de vertices en el grafo
      */
     void reset(size_t nVertices);
