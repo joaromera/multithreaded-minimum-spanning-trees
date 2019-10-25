@@ -5,30 +5,23 @@
 
 
 void ColaDePrioridad::addEje(const Eje &e) {
-    // log("ColaDePrioridad::addEje");
     ejesVecinos.push(e);
 }
 
 Eje ColaDePrioridad::top() const {
-    // log("ColaDePrioridad::top: Estado del heap %s", toString().c_str());
     Eje top = ejesVecinos.top();
-    // // log("Eje top es: (%d, %d, %d)", top.nodoOrigen, top.nodoDestino, top.peso);
     return top;
 }
 
 bool ColaDePrioridad::empty() const {
-    // log("ColaDePrioridad::empty");
     return ejesVecinos.empty();
 }
 
 void ColaDePrioridad::reset() {
-    // log("ColaDePrioridad::reset");
-    // Asigna una cola vacia reiniciando el estado de la cola de prioridad.
     ejesVecinos = std::priority_queue<Eje, vector<Eje>, GreaterEje>();
 }
 
 void ColaDePrioridad::fusionar(ColaDePrioridad &cola) {
-    // log("ColaDePrioridad::fusionar");
     while (! cola.empty() ) {
         this->addEje( cola.ejesVecinos.top() );
         cola.ejesVecinos.pop();
@@ -36,7 +29,6 @@ void ColaDePrioridad::fusionar(ColaDePrioridad &cola) {
 }
 
 void ColaDePrioridad::pop() {
-    // log("ColaDePrioridad::pop");
     ejesVecinos.pop();
 }
 
