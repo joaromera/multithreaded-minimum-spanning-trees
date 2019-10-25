@@ -54,11 +54,9 @@ int Colores::buscarNodoLibre(const int threadID) {
 bool Colores::esDueno(const int nodoID, const int threadID) {
     int dueno;
 
-    log("Viendo si %d es dueño de %d", threadID, nodoID);
     pthread_mutex_lock(&_locks[nodoID]);
         dueno = _colores[nodoID];
     pthread_mutex_unlock(&_locks[nodoID]);
-    log("pude ver si %d es dueño de %d", threadID, nodoID);
 
     return dueno == threadID;
 }
