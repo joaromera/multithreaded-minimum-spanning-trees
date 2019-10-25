@@ -51,5 +51,4 @@ public:
     /** Pasa todos los nodos del thread con id mas grande al thread con id mas
      * chico. */
     void fusionarThreads(const int threadID1, const int threadID2);
-
 };
