@@ -69,7 +69,8 @@ void* mstParaleloThread(void *p) {
 
     // Se obtiene el numero de thread y se inicializan sus estructuras
     int this_thread_id = thread_counter++;
-    threadData[this_thread_id].reset(g->numVertices);
+    Thread &this_thread = threadData[this_thread_id];
+    this_thread.reset(g->numVertices);
 
     Eje eje_actual;
 
@@ -78,7 +79,7 @@ void* mstParaleloThread(void *p) {
         // Atiendo pedidos de fusion recibidos
         // Luego libero el mutex para poder recibir mas
         thread_attend_fusion_requests(this_thread_id);
-        pthread_mutex_unlock(&threadData[this_thread_id].fusion_req);
+        pthread_mutex_unlock(&this_thread.fusion_req);
 
         // Busco nodo libre
         StatusBuscarNodo status = buscarNodo(this_thread_id, eje_actual);
@@ -98,61 +99,61 @@ void* mstParaleloThread(void *p) {
 
         // Al haber un nodo disponible intenta capturarlo
         // El valor devuelto es el ID de su dueño
-        int thread_info = colores.capturarNodo(eje_actual.nodoDestino,
-                                               this_thread_id);
+        int other_thread_id = colores.capturarNodo(eje_actual.nodoDestino, this_thread_id);
+        Thread &other_thread = threadData[other_thread_id];
 
         // Si se capturó con exito, es el mismo ID que el de este thread
-        if (thread_info == this_thread_id) {
+        if (other_thread_id == this_thread_id) {
 
             // Se añade el eje al AGM del thread
             if (eje_actual.esValido()) {
-                threadData[this_thread_id].agm.insertarEje(eje_actual);
+                this_thread.agm.insertarEje(eje_actual);
             }
 
             // Se agregan los ejes alcanzables por el nuevo nodo a la queue
-            threadData[this_thread_id].add_ejes_alcanzables(g, eje_actual.nodoDestino);
+            this_thread.add_ejes_alcanzables(g, eje_actual.nodoDestino);
 
         } else {
             // Caso contrario será el ID del thread con el que debe fusionarse
             // Se hace un pedido de fusión, primero evito recibir nuevos pedidos
-            if ( pthread_mutex_trylock(&threadData[this_thread_id].fusion_req) != 0 ) {
+            if ( pthread_mutex_trylock(&this_thread.fusion_req) != 0 ) {
                 continue;
             }
 
             // Intento pedir la fusion al thread dueño del nodo
-            if ( pthread_mutex_trylock(&threadData[thread_info].fusion_req) != 0 ) {
-                pthread_mutex_unlock(&threadData[this_thread_id].fusion_req);
+            if ( pthread_mutex_trylock(&other_thread.fusion_req) != 0 ) {
+                pthread_mutex_unlock(&this_thread.fusion_req);
                 continue;
             }
 
             // Espero ack del otro thread
-            pthread_mutex_lock(&threadData[thread_info].fusion_ack);
+            pthread_mutex_lock(&other_thread.fusion_ack);
 
             // Verifico que el nodo siga perteneciendo al mismo thread
             // Si es así, resuelvo la fusión
-            if ( colores.esDueno(eje_actual.nodoDestino, thread_info) ) {
+            if ( colores.esDueno(eje_actual.nodoDestino, other_thread_id) ) {
 
-                threadData[this_thread_id].agm.insertarEje(eje_actual);
+                this_thread.agm.insertarEje(eje_actual);
 
                 // Debe predominar el thread de menor id
-                if (this_thread_id < thread_info) {
-                    fuse(this_thread_id, thread_info,
+                if (this_thread_id < other_thread_id) {
+                    fuse(this_thread_id, other_thread_id,
                          eje_actual.nodoOrigen, eje_actual.nodoDestino);
                 } else {
-                    fuse(thread_info, this_thread_id,
+                    fuse(other_thread_id, this_thread_id,
                          eje_actual.nodoDestino, eje_actual.nodoOrigen);
                 }
             }
 
             // Desbloqueo el otro thread.
-            pthread_mutex_unlock(&threadData[thread_info].fusion_req);
-            pthread_mutex_unlock(&threadData[this_thread_id].fusion_req);
-            pthread_mutex_unlock(&threadData[thread_info].fusion_ready);
+            pthread_mutex_unlock(&other_thread.fusion_req);
+            pthread_mutex_unlock(&this_thread.fusion_req);
+            pthread_mutex_unlock(&other_thread.fusion_ready);
         }
     }
 
     // Al terminar el while, se imprime el resultado y se termina el thread.
-    threadData[this_thread_id].agm.imprimirGrafo();
+    this_thread.agm.imprimirGrafo();
 
     return NULL;
 }
