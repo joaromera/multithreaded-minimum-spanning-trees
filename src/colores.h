@@ -23,9 +23,6 @@ private:
     vector<int> _colores;
     vector<pthread_mutex_t> _locks;
 
-    void lockNodo(const int nodoID) const;
-    void unlockNodo(const int nodoID) const;
-
 public:
 
     Colores();
