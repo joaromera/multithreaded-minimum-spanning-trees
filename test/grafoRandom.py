@@ -4,9 +4,9 @@
 import networkx as nx
 import random
 
-for i in range(100,1001,100):
+for i in range(100):
     # grafo de n nodos donde la probabilidad de que un eje exista es de p
-    n = i
+    n = 20
     p = 0.1
     G = nx.erdos_renyi_graph(n, p)
 
@@ -20,6 +20,6 @@ for i in range(100,1001,100):
     m = G.number_of_edges()
     tamanios = "{}\n{}\n".format(n, m)
     tamaniosBytes = bytes(tamanios, "utf-8")
-    with open("experimentacion/ralo/ralo" + str(i) + ".txt", "wb") as file:  # te hace el open y el close
+    with open("experimentacion/fusiones/ralo" + str(i) + ".txt", "wb") as file:  # te hace el open y el close
         file.write(tamaniosBytes)
         nx.write_weighted_edgelist(G, file)

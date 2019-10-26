@@ -3,8 +3,8 @@
 
 import networkx as nx
 import random
-for i in range(100,1001,100):
-    n = i
+for i in range(100):
+    n = 20
 
     G = nx.random_powerlaw_tree(n,tries=1000000)
 
@@ -14,6 +14,6 @@ for i in range(100,1001,100):
     m = G.number_of_edges()
     tamanios = "{}\n{}\n".format(n, m)
     tamaniosBytes = bytes(tamanios, "utf-8")
-    with open("experimentacion/arbol/arbol" + str(i) + ".txt", "wb") as file:  # te hace el open y el close
+    with open("experimentacion/fusiones/arbol" + str(i) + ".txt", "wb") as file:  # te hace el open y el close
         file.write(tamaniosBytes)
         nx.write_weighted_edgelist(G, file)

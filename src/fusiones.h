@@ -40,6 +40,7 @@ void fuse(const int tid1, const int tid2, const int nodo1, const int nodo2)
     assert(colores.esDueno(nodo1, tid1));
     assert(colores.esDueno(nodo2, tid2));
 
+    fusion_counter++;
     colores.fusionarThreads(tid1, tid2);
     fuse_agm(threadData[tid1].agm, threadData[tid2].agm);
     threadData[tid1].ejesVecinos.fusionar(threadData[tid2].ejesVecinos);

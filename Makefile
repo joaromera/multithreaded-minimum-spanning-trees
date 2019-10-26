@@ -5,8 +5,8 @@ ODIR = bin
 
 CC=g++
 CPP_STANDARD=c++11
-CFLAGS=-c -pthread -std=$(CPP_STANDARD) -ggdb
-LFLAGS=-pthread -std=$(CPP_STANDARD) -ggdb
+CFLAGS=-c -pthread -std=$(CPP_STANDARD) -O3
+LFLAGS=-pthread -std=$(CPP_STANDARD) -O3
 
 HEADERS = $(wildcard ${SDIR}/*.h) $(wildcard ${SDIR}/*.hpp)
 OBJS = $(patsubst ${SDIR}/%.cpp,${ODIR}/%.o,$(wildcard ${SDIR}/*.cpp))

@@ -4,6 +4,7 @@
 #include "globales.h"
 #include <chrono>
 #include <time.h>
+#include <fstream>
 
 // Definida en tp1_grafo.cpp
 void mstParalelo(Grafo *g, int cantThreads);
@@ -15,12 +16,15 @@ void resetExperimentacion()
     pthread_id.clear();
     colores.reset(0);
     thread_counter = 0;
+    fusion_counter = 0;
 }
 
 // Procedimiento para realizar las pruebas o test mínimo de la cátedra
 void experimentacion() {
     imprimirResultado = false;
-    cout << "instancia,n,grafo,threads, tiempo" << endl;
+    ofstream outfile;
+    outfile.open("file.csv", std::ofstream::out | std::ofstream::trunc);
+    outfile << "instancia,n,grafo,threads, tiempo" << endl;
     int instancia = 0;
     string grafo;
 
@@ -53,7 +57,7 @@ void experimentacion() {
                     mstParalelo(&g, 1);
                     auto end = std::chrono::steady_clock::now();
 
-                    std::cout << instancia << "," << n << "," << grafo << "," << 1 << ","
+                    outfile << instancia << "," << n << "," << grafo << "," << 1 << ","
                               << std::chrono::duration <double, std::milli> (end-start).count()
                               << std::endl;
                     instancia++;
@@ -66,7 +70,7 @@ void experimentacion() {
                     mstParalelo(&g, 1);
                     auto end = std::chrono::steady_clock::now();
 
-                    std::cout << instancia << "," << n << "," << grafo << "," << 1 << ","
+                    outfile << instancia << "," << n << "," << grafo << "," << 1 << ","
                               << std::chrono::duration <double, std::milli> (end-start).count()
                               << std::endl;
                     instancia++;
@@ -79,7 +83,7 @@ void experimentacion() {
                     mstParalelo(&g, 1);
                     auto end = std::chrono::steady_clock::now();
 
-                    std::cout << instancia << "," << n << "," << grafo << "," << 1 << ","
+                    outfile << instancia << "," << n << "," << grafo << "," << 1 << ","
                               << std::chrono::duration <double, std::milli> (end-start).count()
                               << std::endl;
                     instancia++;
@@ -93,7 +97,7 @@ void experimentacion() {
                         mstParalelo(&g, threads);
                         auto end = std::chrono::steady_clock::now();
 
-                        std::cout << instancia << "," << n << "," << grafo << "," << threads << ","
+                        outfile << instancia << "," << n << "," << grafo << "," << threads << ","
                                   << std::chrono::duration <double, std::milli> (end-start).count()
                                   << std::endl;
                         instancia++;
@@ -106,7 +110,7 @@ void experimentacion() {
                         mstParalelo(&g, threads);
                         auto end = std::chrono::steady_clock::now();
 
-                        std::cout << instancia << "," << n << "," << grafo << "," << threads << ","
+                        outfile << instancia << "," << n << "," << grafo << "," << threads << ","
                                   << std::chrono::duration <double, std::milli> (end-start).count()
                                   << std::endl;
                         instancia++;
@@ -119,7 +123,7 @@ void experimentacion() {
                         mstParalelo(&g, threads);
                         auto end = std::chrono::steady_clock::now();
 
-                        std::cout << instancia << "," << n << "," << grafo << "," << threads << ","
+                        outfile << instancia << "," << n << "," << grafo << "," << threads << ","
                                   << std::chrono::duration <double, std::milli> (end-start).count()
                                   << std::endl;
                         instancia++;
@@ -129,4 +133,65 @@ void experimentacion() {
             }
         }
     }
+    outfile.close();
+}
+
+// Procedimiento para realizar experimento de cantidad de fusiones
+void experimentacion_fusiones() {
+    imprimirResultado = false;
+    ofstream outfile;
+    outfile.open("fusiones.csv", std::ofstream::out | std::ofstream::trunc);
+    outfile << "instancia,n,grafo,threads,fusiones,tiempo" << endl;
+    int instancia = 0;
+    string grafo;
+
+    for (int n = 0; n < 100; n++) {
+        for (int k = 0; k <= 2; k++) {
+            Grafo g;
+            if (k == 0) {
+                if (g.inicializar("test/experimentacion/fusiones/arbol" + to_string(n) +".txt") != 1) {
+                    cerr << "No se pudo cargar el grafo correctamente" << endl;
+                    return;
+                }
+            }
+            if (k == 1) {
+                if (g.inicializar("test/experimentacion/fusiones/completo" + to_string(n) + ".txt") != 1)
+                {
+                    cerr << "No se pudo cargar el grafo correctamente" << endl;
+                    return;
+                }
+            }
+
+            for (int i = 0; i < 10; i++) {
+                for (int threads = 1; threads <= 40; threads++) {
+                    if (k == 0) {
+                        grafo = "arbol";
+                        auto start = std::chrono::steady_clock::now();
+                        mstParalelo(&g, threads);
+                        auto end = std::chrono::steady_clock::now();
+
+                        outfile << instancia << "," << n << "," << grafo << "," << threads << "," << fusion_counter << ","
+                                << std::chrono::duration <double, std::milli> (end-start).count()
+                                << std::endl;
+                        instancia++;
+                        resetExperimentacion();
+                    }
+
+                    if (k == 1) {
+                        grafo = "completo";
+                        auto start = std::chrono::steady_clock::now();
+                        mstParalelo(&g, threads);
+                        auto end = std::chrono::steady_clock::now();
+
+                        outfile << instancia << "," << n << "," << grafo << "," << threads << "," << fusion_counter << ","
+                                << std::chrono::duration <double, std::milli> (end-start).count()
+                                << std::endl;
+                        instancia++;
+                        resetExperimentacion();
+                    }
+                }
+            }
+        }
+    }
+    outfile.close();
 }

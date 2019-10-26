@@ -153,7 +153,7 @@ void* mstParaleloThread(void *p) {
     }
 
     // Al terminar el while, se imprime el resultado y se termina el thread.
-    this_thread.agm.imprimirGrafo();
+    // this_thread.agm.imprimirGrafo();
 
     return NULL;
 }
@@ -200,6 +200,11 @@ int main(int argc, char const * argv[]) {
 
     if (string(argv[1]) == "-e") {
         experimentacion();
+        return 0;
+    }
+
+    if (string(argv[1]) == "-ef") {
+        experimentacion_fusiones();
         return 0;
     }
 
