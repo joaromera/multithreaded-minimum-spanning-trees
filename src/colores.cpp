@@ -75,5 +75,4 @@ void Colores::fusionarThreads(const int threadID1, const int threadID2) {
         }
         pthread_mutex_unlock(&_locks[i]);
     }
-
 }

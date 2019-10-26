@@ -28,33 +28,43 @@ enum StatusBuscarNodo { Ok, AgmCompleto, NoHayNodosDisponibles };
 // Si el thread todavia no tiene nodos, busca uno libre.
 // Si no hay nodos libres, avisa para luego terminar.
 StatusBuscarNodo buscarNodo(int thread, Eje &out) {
+
+    // Si no hay ejes en la queue del thread, hay que buscar un nuevo nodo
     if ( threadData[thread].ejesVecinos.empty() ) {
         const int nodo = colores.buscarNodoLibre(thread);
+
         if (nodo != -1) {
             out = Eje(nodo, nodo, 0);
             return Ok;
         } else {
+            // al no encontrar ninguno libre, termina
             return NoHayNodosDisponibles;
         }
+
     } else {
+        // Hay ejes en la queue del thread, busca el más cercano
         while ( ! threadData[thread].ejesVecinos.empty() ) {
             Eje e = threadData[thread].ejesVecinos.top();
+
+            // Si todavía no lo capturó, devuelve el encontrado
             if (! colores.esDueno(e.nodoDestino, thread)) {
                 out = e;
                 return Ok;
             }
+
             // Quita este eje de los ejesVecinos
             threadData[thread].ejesVecinos.pop();
         }
+
+        // Sin ejes disponibles y la queue vacía, el agm está completo
         return AgmCompleto;
     }
 }
 
-// Gestión principal del thread. Contiene el ciclo que le permite a cada thread hacer sus funciones.
+// Gestión principal del thread para completar el AGM
 void* mstParaleloThread(void *p) {
 
-    // Grafo compartido entre todos los threads. No es necesario incluir
-    // mecanismos de sincronización, pues no lo modifican.
+    // Grafo compartido entre todos los threads
     Grafo* g = (Grafo*) p;
 
     // Se obtiene el numero de thread y se inicializan sus estructuras
@@ -63,9 +73,10 @@ void* mstParaleloThread(void *p) {
 
     Eje eje_actual;
 
-    // Ciclo principal de cada thread
-    while(true){
-        // Atiendo pedidos de fusion recibidos y libero el mutex para poder recibir mas
+    // Empieza a armar el AGM
+    while (true) {
+        // Atiendo pedidos de fusion recibidos
+        // Luego libero el mutex para poder recibir mas
         thread_attend_fusion_requests(this_thread_id);
         pthread_mutex_unlock(&threadData[this_thread_id].fusion_req);
 
@@ -74,12 +85,10 @@ void* mstParaleloThread(void *p) {
 
         if (status == NoHayNodosDisponibles) {
 
-            // Al terminar el thread, es posible tener otro thread pidiendo una
-            // fusión. Le da acknoweledge a esos threads para que sepan que ya
-            // no tenemos el nodo deseado.
+            // Antes de terminar, atiende los pedidos de fusión pendientes
+            // avisando a esos threads que ya no tenemos el nodo deseado.
+            // No libera el lock 'fusion_req' para no recibir más pedidos.
             thread_attend_fusion_requests(this_thread_id);
-
-            // Esta vez no libero el 'lock' de este thread para que no me pidan mas fusiones.
             return NULL;
         }
 
@@ -87,37 +96,30 @@ void* mstParaleloThread(void *p) {
             break;
         }
 
-        // Intenta capturar el nodo buscado. El valor deuvelto es el dueño del
-        // nodo:
-        // - Si se capturó con exito, es el mismo ID que el de este thread.
-        // - Caso contrario será el ID del thread con el que debe fusionarse.
+        // Al haber un nodo disponible intenta capturarlo
+        // El valor devuelto es el ID de su dueño
         int thread_info = colores.capturarNodo(eje_actual.nodoDestino,
-                                                     this_thread_id);
+                                               this_thread_id);
 
-        // Si se logra tomar, se procesa.
+        // Si se capturó con exito, es el mismo ID que el de este thread
         if (thread_info == this_thread_id) {
 
-            // Nodos padre e hijo (en la jerarquia del AGM) del eje a añadir.
-            int padre = eje_actual.nodoOrigen;
-            int hijo = eje_actual.nodoDestino;
-
-            // Se añade el eje al AGM
-            if (padre != hijo) {
+            // Se añade el eje al AGM del thread
+            if (eje_actual.esValido()) {
                 threadData[this_thread_id].agm.insertarEje(eje_actual);
             }
 
-            // Se añaden a la cola de prioridad, los ejes alcanzables por el
-            // nuevo nodo.
-            threadData[this_thread_id].add_ejes_alcanzables(g, hijo);
+            // Se agregan los ejes alcanzables por el nuevo nodo a la queue
+            threadData[this_thread_id].add_ejes_alcanzables(g, eje_actual.nodoDestino);
 
         } else {
-            // No se logra tomar, se hace un pedido para fusionarse, para eso primero
-            // evito recibir pedidos
+            // Caso contrario será el ID del thread con el que debe fusionarse
+            // Se hace un pedido de fusión, primero evito recibir nuevos pedidos
             if ( pthread_mutex_trylock(&threadData[this_thread_id].fusion_req) != 0 ) {
                 continue;
             }
 
-            // Intento pedir la fusion
+            // Intento pedir la fusion al thread dueño del nodo
             if ( pthread_mutex_trylock(&threadData[thread_info].fusion_req) != 0 ) {
                 pthread_mutex_unlock(&threadData[this_thread_id].fusion_req);
                 continue;
@@ -126,11 +128,13 @@ void* mstParaleloThread(void *p) {
             // Espero ack del otro thread
             pthread_mutex_lock(&threadData[thread_info].fusion_ack);
 
-            // Verifica que el nodo sigue perteneciendo al mismo thread. Esto
-            // puede cambiar si el otro thread aceptó una fusion entrante antes
-            // de atender a este thread. Si no es asi, vuelve a empezar.
+            // Verifico que el nodo siga perteneciendo al mismo thread
+            // Si es así, resuelvo la fusión
             if ( colores.esDueno(eje_actual.nodoDestino, thread_info) ) {
+
                 threadData[this_thread_id].agm.insertarEje(eje_actual);
+
+                // Debe predominar el thread de menor id
                 if (this_thread_id < thread_info) {
                     fuse(this_thread_id, thread_info,
                          eje_actual.nodoOrigen, eje_actual.nodoDestino);
@@ -139,13 +143,15 @@ void* mstParaleloThread(void *p) {
                          eje_actual.nodoDestino, eje_actual.nodoOrigen);
                 }
             }
+
             // Desbloqueo el otro thread.
             pthread_mutex_unlock(&threadData[thread_info].fusion_req);
             pthread_mutex_unlock(&threadData[this_thread_id].fusion_req);
             pthread_mutex_unlock(&threadData[thread_info].fusion_ready);
         }
     }
-    // Al terminar el loop, se imprime el resultado y se termina el thread.
+
+    // Al terminar el while, se imprime el resultado y se termina el thread.
     threadData[this_thread_id].agm.imprimirGrafo();
 
     return NULL;

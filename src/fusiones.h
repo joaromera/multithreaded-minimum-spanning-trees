@@ -3,7 +3,22 @@
 #include "grafo.h"
 #include "globales.h"
 
-// Copia el agm g2 en g1, pasando todos sus ejes
+/* Atender pedidos de fusion recibidos
+ * Al terminar, el mutex 'fusion_req' de este thread queda cerrado, por lo
+ * que debe desbloquearse si desea que el thread pueda seguir recibiendo
+ * pedidos para fusionarse.
+ */
+void thread_attend_fusion_requests(int tid)
+{
+    // Mientras exista un fusion_req entrante, los atiende
+    while (pthread_mutex_trylock(&threadData[tid].fusion_req))
+    {
+        pthread_mutex_unlock(&threadData[tid].fusion_ack);
+        pthread_mutex_lock(&threadData[tid].fusion_ready);
+    }
+}
+
+// Copia el AGM g2 en g1, pasando todos sus ejes
 void fuse_agm(Grafo &g1, Grafo &g2)
 {
     for (int i = 0; i < g1.numVertices; i++)
@@ -29,19 +44,4 @@ void fuse(const int tid1, const int tid2, const int nodo1, const int nodo2)
     fuse_agm(threadData[tid1].agm, threadData[tid2].agm);
     threadData[tid1].ejesVecinos.fusionar(threadData[tid2].ejesVecinos);
     threadData[tid2].reset(threadData[tid1].agm.numVertices);
-}
-
-/* Atender pedidos de fusion recibidos
- * Al terminar, el mutex 'fusion_req' de este thread queda cerrado, por lo
- * que debe desbloquearse si desea que el thread pueda seguir recibiendo
- * pedidos para fusionarse.
- */
-void thread_attend_fusion_requests(int tid)
-{
-    // Mientras exista un fusion_req entrante, los atiende
-    while (pthread_mutex_trylock(&threadData[tid].fusion_req))
-    {
-        pthread_mutex_unlock(&threadData[tid].fusion_ack);
-        pthread_mutex_lock(&threadData[tid].fusion_ready);
-    }
 }

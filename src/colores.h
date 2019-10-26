@@ -5,16 +5,16 @@
 
 using namespace std;
 
-/**
- * Diccionario de dueños de nodos. Esta es una estructura auxiliar al algoritmo
- * `mstParalelo` que permite manejar el "ownership" de los nodos por los
+/*
+ * Diccionario de nodos a dueños. Esta es una estructura auxiliar al algoritmo
+ * 'mstParalelo' que permite manejar el "ownership" de los nodos por los
  * threads. Es una estructura compartida que todo thread puede acceder
  * concurrentemente.
  *
  * Un nodo puede cambiar de dueño (color) en dos situaciones:
  * - Puede ser capturado por un thread si previamente no tenía color asignado.
  * - Todos los nodos de un thread pasan a ser propiedad de otro thread luego de
- *   resolver un proceso de fusión.
+ *   resolver un pedido de fusión.
  */
 class Colores {
 
@@ -30,25 +30,21 @@ public:
 
     Colores();
 
-    /** Reinicia el estado de la clase */
+    // Reinicia el estado de la clase
     void reset(const size_t n);
 
-    /** Intenta capturar un nodo. Devuelve el threadID del dueño del nodo.
-     *
+    /* Intenta capturar un nodo. Devuelve el threadID del dueño del nodo.
      * nodoID: ID del nodo a capturar.
      * threadID: Id del thread que llama a este metodo.
      */
     int capturarNodo(const int nodoID, const int threadID);
 
-    /** Devuelve id del thread dueño de un nodo. Devuelve -1 si el nodo no
-     * tiene dueño. 
-     */
+    // Devuelve id del thread dueño de un nodo o -1 si el nodo no tiene dueño
     bool esDueno(const int nodoID, const int threadID);
 
-    /** Se adueña de un nodo libre. De no existir devuelve -1. */
+    // Se adueña de un nodo libre. De no existir devuelve -1
     int buscarNodoLibre(const int threadID);
 
-    /** Pasa todos los nodos del thread con id mas grande al thread con id mas
-     * chico. */
+    // Pasa todos los nodos del thread de mayor ID al thread con id menor
     void fusionarThreads(const int threadID1, const int threadID2);
 };

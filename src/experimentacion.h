@@ -8,7 +8,7 @@
 // Definida en tp1_grafo.cpp
 void mstParalelo(Grafo *g, int cantThreads);
 
-//Reinicia la experimentación.
+// Reinicia las estructuras globales para experimentación
 void resetExperimentacion()
 {
     threadData.clear();
@@ -17,7 +17,7 @@ void resetExperimentacion()
     thread_counter = 0;
 }
 
-//Procedimiento para realizar las pruebas o test mínimo de la cátedra.
+// Procedimiento para realizar las pruebas o test mínimo de la cátedra
 void experimentacion() {
     imprimirResultado = false;
     cout << "instancia,n,grafo,threads, tiempo" << endl;

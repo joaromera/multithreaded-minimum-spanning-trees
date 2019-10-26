@@ -5,24 +5,17 @@
 #include <vector>
 #include <atomic>
 
-// -----------------------------------------------------------------------------
-// Variables globales
-// -----------------------------------------------------------------------------
-
 // Imprimir el grafo resultado durante los experimentos
 bool imprimirResultado = true;
 
-// Se sugieren usar variables (unas atómicas y otras no) para:
-
-// Contener el estado global de la estructura de threads.
+// Estado de cada thread
 std::vector<Thread> threadData;
 
-// Para coordinar el número de cada thread durante la inizializacion de threads.
+// Contador para identificar los threads al inicializarlos
 atomic<int> thread_counter {0};
 
-// Para para coordinar el id de cada thread durante la inizializacion y
-// reinicializacion de threads.
+// Para coordinar la creación de cada thread y esperar a su finalización
 std::vector<pthread_t> pthread_id;
 
-// Estructura atomica que registra los colores de los nodos.
+// Estructura atomica que registra los colores (id de los dueños) de los nodos
 Colores colores;

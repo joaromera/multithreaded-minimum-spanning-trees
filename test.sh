@@ -46,9 +46,9 @@ correr_test() {
 make clean && make -j
 #correr_test "k3" 1
 #correr_test "otro_test" 1
-#for i in {1..100}; do correr_test "k3"        2; done
-#for i in {1..100}; do correr_test "otro_test" 2; done
-# for i in {1..1000}; do correr_test "k3"        3; done
-# for i in {1..1000}; do correr_test "otro_test" 3; done
+for i in {1..1000}; do correr_test "k3"        2; done
+for i in {1..1000}; do correr_test "otro_test" 2; done
+for i in {1..1000}; do correr_test "k3"        3; done
+for i in {1..1000}; do correr_test "otro_test" 3; done
 for i in {1..3000}; do correr_test "k3"        4; done
 for i in {1..3000}; do correr_test "otro_test" 4; done

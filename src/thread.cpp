@@ -29,6 +29,6 @@ void Thread::reset(size_t nVertices)
         agm.insertarNodo(i);
     }
 
-    // Reinicia
-    ejesVecinos.reset();
+    // Limpia la cola de prioridad de ejes
+    ejesVecinos.clear();
 }

@@ -3,7 +3,6 @@
 #include "cola_prioridad.h"
 #include "log.h"
 
-
 void ColaDePrioridad::addEje(const Eje &e) {
     ejesVecinos.push(e);
 }
@@ -17,7 +16,7 @@ bool ColaDePrioridad::empty() const {
     return ejesVecinos.empty();
 }
 
-void ColaDePrioridad::reset() {
+void ColaDePrioridad::clear() {
     ejesVecinos = std::priority_queue<Eje, vector<Eje>, GreaterEje>();
 }
 

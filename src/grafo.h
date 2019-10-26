@@ -27,6 +27,9 @@ typedef struct Eje {
 
     Eje() : nodoOrigen(0), nodoDestino(0), peso(0) {}
 
+    // Verifica que el eje no sea cíclico
+    bool esValido();
+
 } Eje;
 
 /* Modificaciones realizadas:

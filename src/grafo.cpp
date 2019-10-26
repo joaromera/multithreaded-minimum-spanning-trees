@@ -2,6 +2,9 @@
 #include <fstream>
 #include <stack>
 
+bool Eje::esValido() {
+  return nodoOrigen != nodoDestino;
+}
 
 int Grafo::inicializar(string nombreArchivo) {
   numVertices = 0;
@@ -59,7 +62,6 @@ void Grafo::insertarEje(int nodoA, int nodoB, int peso) {
   listaDeAdyacencias[nodoB].push_back(ejeB);
 
   incrementarTotalEjes();
-
 }
 
 void Grafo::incrementarTotalEjes() {

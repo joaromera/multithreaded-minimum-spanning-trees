@@ -7,11 +7,10 @@
 
 using namespace std;
 
-/** Estructura para obtener el eje mas corto alcanzable en un ciclo de Prim.
- *
- * - En todo momento, `top()` debe devolver el eje mas corto alcanzable.
- * - Cuando el thread se expande debe indicarle con `pop()` que ese eje mas
- *   corto fue añadido al AGM.
+/* Estructura para obtener el eje de menor peso
+ * En todo momento, 'top()' debe devolver el eje de menor peso.
+ * Cuando el thread expande su AGM, cada eje agregado al mismo
+ * debe eliminarse de la cola usando 'pop()'
  */
 class ColaDePrioridad {
 
@@ -30,25 +29,25 @@ private:
 
 public:
 
-    /** Añade un eje a la cola de prioridad */
+    // Añade un eje a la cola de prioridad
     void addEje(const Eje &e);
 
-    /** Devuelve el par de nodos mas cercano en la cola de prioridad. */
+    // Devuelve el par de nodos mas cercano en la cola de prioridad
     Eje top() const;
 
-    /** Devuelve true si la cola de prioridad esta vacia */
+    // Devuelve true si la cola de prioridad esta vacia
     bool empty() const;
 
-    /** Reinicia el estado de la cola de prioridad */
-    void reset();
+    // Reinicia el estado de la cola de prioridad
+    void clear();
 
-    /** Quita todos los elementos de la otra cola de prioridad y los inserta en
-     * esta cola de prioridad. La otra cola de prioridad queda vacia. */
+    // Quita todos los elementos de la otra cola de prioridad y los inserta en
+    // esta cola de prioridad. La otra cola de prioridad queda vacia
     void fusionar(ColaDePrioridad &cola);
 
-    /** Elimina el elemento de menor peso */
+    // Elimina el elemento de menor peso
     void pop();
 
+    // Devuelve un string mostrando todos los ejes
     std::string toString() const;
-
 };
