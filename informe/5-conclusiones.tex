@@ -1,13 +1,1 @@
 \section{Conclusiones y trabajo futuro}
-
-Gracias a los experimentos realizados en el presente trabajo, se pudo llegar a la conclusión de que las ventajas que puede brindar el paradigma \textbf{SIMD} a la hora de implementar programas que realicen operaciones altamente paralelizables, como el procesamiento de imágenes, son verdaderamente significativas. Esto queda reflejado en la gran brecha de rendimiento que se observa entre algunas implementaciones realizadas con dicho paradigma y las que utilizan el lenguaje de programación C.
-
-Esto siempre debe contraponerse a otro hecho que se hizo presente durante el proceso de implementación: realizar un programa en lenguaje ensamblador resulta, por lo general, considerablemente más difícil que hacerlo en un lenguaje de más alto nivel. El código resultante es menos legible, es más sencillo cometer errores y el proceso de \emph{debugging} se vuelve considerablemente más arduo. Por eso es importante analizar de antemano las características del contexto particular de aplicación, para poder decidir si este esfuerzo adicional realmente vale la pena.
-
-Incluso una vez realizada una implementación en ASM, es necesario comparar el rendimiento de ambas versiones con distintos tamaños de imágenes para ver que efectivamente haya una mejora y el grado de la misma -por ejemplo, en nuestras implementaciones Offset para tamaños grandes obtuvo peores resultados que la versión en C con O3-. Otros aspectos a tener en consideración es el tamaño de los binarios involucrados, que puede ser decisivo en determinados escenarios.
-
-También se intentó la realización de una optimización manual dentro del código ensamblador, con distintos resultados. Por ejemplo: expander los ciclos, inlinear llamadas a funciones, analizar instrucciones individuales para encontrar alternativas, tuvieron distintos beneficios en algunos casos y en otros no. Estas optimizaciones son realizadas por el compilador de C al setear alguna opción del flag O, las distintas técnicas de optimización que realizan los mismos pueden servir de inspiración a la hora de intentar mejorar el rendimiento de un programa, pero su justificación siempre tendrá que ser acompañada de métricas que las respalden.
-
-Por último, pudimos hacer una pequeña prueba con la extensión del modelo de SIMD propuesto por la tecnología AVX2 cuyos resultados confirmaron las ventajas de su utilización en la programación vectorial a bajo nivel.
-
-Esperamos que la experiencia nos provea de nuevos recursos a la hora de afrontar problemáticas similares en el futuro.
