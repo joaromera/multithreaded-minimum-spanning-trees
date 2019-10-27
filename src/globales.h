@@ -17,6 +17,9 @@ atomic<int> thread_counter {0};
 // Contador de fusiones, para experimento
 atomic<int> fusion_counter {0};
 
+// Contador de tiempo para experimento
+atomic<long long> idle_counter {0};
+
 // Para coordinar la creación de cada thread y esperar a su finalización
 std::vector<pthread_t> pthread_id;
 

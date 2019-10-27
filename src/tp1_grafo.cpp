@@ -114,15 +114,20 @@ void* mstParaleloThread(void *p) {
             this_thread.add_ejes_alcanzables(g, eje_actual.nodoDestino);
 
         } else {
+            auto start = std::chrono::steady_clock::now();
             // Caso contrario será el ID del thread con el que debe fusionarse
             // Se hace un pedido de fusión, primero evito recibir nuevos pedidos
             if ( pthread_mutex_trylock(&this_thread.fusion_req) != 0 ) {
+                auto end = std::chrono::steady_clock::now();
+                idle_counter += (end-start).count();
                 continue;
             }
 
             // Intento pedir la fusion al thread dueño del nodo
             if ( pthread_mutex_trylock(&other_thread.fusion_req) != 0 ) {
                 pthread_mutex_unlock(&this_thread.fusion_req);
+                auto end = std::chrono::steady_clock::now();
+                idle_counter += (end - start).count();
                 continue;
             }
 
@@ -149,6 +154,8 @@ void* mstParaleloThread(void *p) {
             pthread_mutex_unlock(&other_thread.fusion_req);
             pthread_mutex_unlock(&this_thread.fusion_req);
             pthread_mutex_unlock(&other_thread.fusion_ready);
+            auto end = std::chrono::steady_clock::now();
+            idle_counter += (end - start).count();
         }
     }
 
@@ -205,6 +212,11 @@ int main(int argc, char const * argv[]) {
 
     if (string(argv[1]) == "-ef") {
         experimentacion_fusiones();
+        return 0;
+    }
+
+    if (string(argv[1]) == "-eft") {
+        experimentacion_fusion_time();
         return 0;
     }
 
