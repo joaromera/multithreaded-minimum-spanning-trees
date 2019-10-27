@@ -152,9 +152,6 @@ void* mstParaleloThread(void *p) {
         }
     }
 
-    // Al terminar el while, se imprime el resultado y se termina el thread.
-    this_thread.agm.imprimirGrafo();
-
     return NULL;
 }
 
