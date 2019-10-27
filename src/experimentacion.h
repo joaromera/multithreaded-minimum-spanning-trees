@@ -17,11 +17,17 @@ void resetExperimentacion()
     thread_counter = 0;
 }
 
+void writerow(std::string grafo, uint32_t n_threads, uint32_t n_nodes, std::chrono::duration<double, std::milli> timedelta) {
+    cout << grafo << ","
+         << n_threads << ","
+         << n_nodes << ","
+         << timedelta.count() << endl;
+}
+
 // Procedimiento para realizar las pruebas o test mínimo de la cátedra
 void experimentacion() {
     imprimirResultado = false;
-    cout << "instancia,n,grafo,threads, tiempo" << endl;
-    int instancia = 0;
+    cout << "grafo,threads,n,tiempo" << endl;
     string grafo;
 
     for (int n = 100; n <= 1000; n += 100) {
@@ -53,10 +59,8 @@ void experimentacion() {
                     mstParalelo(&g, 1);
                     auto end = std::chrono::steady_clock::now();
 
-                    std::cout << instancia << "," << n << "," << grafo << "," << 1 << ","
-                              << std::chrono::duration <double, std::milli> (end-start).count()
-                              << std::endl;
-                    instancia++;
+                    auto timedelta = std::chrono::duration<double, std::milli>(end-start);
+                    writerow(grafo, 1, n, timedelta);
                     resetExperimentacion();
                 }
 
@@ -66,10 +70,8 @@ void experimentacion() {
                     mstParalelo(&g, 1);
                     auto end = std::chrono::steady_clock::now();
 
-                    std::cout << instancia << "," << n << "," << grafo << "," << 1 << ","
-                              << std::chrono::duration <double, std::milli> (end-start).count()
-                              << std::endl;
-                    instancia++;
+                    auto timedelta = std::chrono::duration<double, std::milli>(end-start);
+                    writerow(grafo, 1, n, timedelta);
                     resetExperimentacion();
                 }
 
@@ -79,10 +81,8 @@ void experimentacion() {
                     mstParalelo(&g, 1);
                     auto end = std::chrono::steady_clock::now();
 
-                    std::cout << instancia << "," << n << "," << grafo << "," << 1 << ","
-                              << std::chrono::duration <double, std::milli> (end-start).count()
-                              << std::endl;
-                    instancia++;
+                    auto timedelta = std::chrono::duration<double, std::milli>(end-start);
+                    writerow(grafo, 1, n, timedelta);
                     resetExperimentacion();
                 }
 
@@ -93,10 +93,8 @@ void experimentacion() {
                         mstParalelo(&g, threads);
                         auto end = std::chrono::steady_clock::now();
 
-                        std::cout << instancia << "," << n << "," << grafo << "," << threads << ","
-                                  << std::chrono::duration <double, std::milli> (end-start).count()
-                                  << std::endl;
-                        instancia++;
+                        auto timedelta = std::chrono::duration<double, std::milli>(end-start);
+                        writerow(grafo, threads, n, timedelta);
                         resetExperimentacion();
                     }
 
@@ -106,10 +104,8 @@ void experimentacion() {
                         mstParalelo(&g, threads);
                         auto end = std::chrono::steady_clock::now();
 
-                        std::cout << instancia << "," << n << "," << grafo << "," << threads << ","
-                                  << std::chrono::duration <double, std::milli> (end-start).count()
-                                  << std::endl;
-                        instancia++;
+                        auto timedelta = std::chrono::duration<double, std::milli>(end-start);
+                        writerow(grafo, threads, n, timedelta);
                         resetExperimentacion();
                     }
 
@@ -119,10 +115,8 @@ void experimentacion() {
                         mstParalelo(&g, threads);
                         auto end = std::chrono::steady_clock::now();
 
-                        std::cout << instancia << "," << n << "," << grafo << "," << threads << ","
-                                  << std::chrono::duration <double, std::milli> (end-start).count()
-                                  << std::endl;
-                        instancia++;
+                        auto timedelta = std::chrono::duration<double, std::milli>(end-start);
+                        writerow(grafo, threads, n, timedelta);
                         resetExperimentacion();
                     }
                 }
