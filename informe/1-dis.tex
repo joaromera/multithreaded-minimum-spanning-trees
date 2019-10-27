@@ -1,174 +1,89 @@
-\subsection{Cuadrados}
+\section{Desarrollo}
 
-\subsubsection{Descripción}
+\subsection{Estructuras}
 
-\begin{center}
-	\includegraphics[width=0.5\textwidth]{imagenes/ncfom-cuadrados.jpg}
-\end{center}
+\subsubsection{Thread}
+\begin{verbatim}
+struct Thread{
+    Grafo agm;
+    ColaDePrioridad ejesVecinos;
+    pthread_mutex_t fusion_req;   
+    pthread_mutex_t fusion_ack;   
+    pthread_mutex_t fusion_ready; 
+};
+\end{verbatim}
 
-Esta operación genera un efecto \textit{geométrico}, borrando curvas y generando un efecto de \textit{cuadrados}. Esto se logra reemplazando cada píxel por el máximo en un cuadrado con vértice en dicho píxel.
-\[cuadrado(p) = \underset{0\leq i \leq 3, 0 \leq j \leq 3}{\max} A[p_0+i][p_1+j] \]
+ Trabajamos con esta estructura para resguardar la información de cada thread. La misma consiste de un grafo que será el agm parcial del thread, una cola de prioridad que contiene a los ejes cuyo nodo destino es alcanzable desde el agm y tres mutex para administrar las fusiones. Tendremos un vector global que contendrá uno de estos structs por cada thread. El nombre del mismo es threadData.
 
-\subsubsection{Implementación ASM}
 
-En este filtro procesamos de a 4 píxeles: tenemos dos ciclos, uno que recorre las columnas de la imagen y otro que recorre las filas. A continuación el pseudocódigo de la implementación \textit{SIMD}:
 
-\begin{itemize}
+\subsubsection{Colores}
+\begin{verbatim}
+class Colores {
 
-\item Primero se arma el stack frame y se guardan en los registros de propósito general las entradas. (Líneas 30 a 45)
-\item Luego se dibuja el borde negro de 4 píxeles con el llamado a la función auxiliar \textit{CompletarConCeros} en la línea 52.
-\item Antes de comenzar el ciclo se limpian los registros usados para evitar errores. (Líneas 62 a 70)
-\item Se setea el comienzo de las imágenes fuente y de destino luego del borde negro, y se trae de memoria la máscara a usar. (Líneas 72 a 77)
-\item Iniciamos los índices de columnas, filas y offset a usar para los ciclos del algoritmo. (Líneas 80 a 91)
-\item Condiciones de los ciclos de filas y columnas: si la fila llegó al final, saltar al final del ciclo de filas, y análogo con las columnas.
-\item El cuerpo del ciclo principal del filtro es donde se realiza el proceso del filtro. En los registros XMM se carga la matriz desde la memoria.
-\end{itemize}
+    vector<int> _colores;
+    vector<pthread_mutex_t> _locks;
+};
+\end{verbatim}
+Para controlar que thread es dueño de cada nodo utilizamos esta estructura que contiene un vector con el color de cada uno, los cuales no son otra cosa que los thread id. Para evitar race condition e incongruencias cada nodo tiene además un mutex asociado que utilizaremos tanto para conocer a su dueño como para cambiarlo. 
 
-\begin{codesnippet}
-  \begin{verbatim}
-	103		;Loading 4x4 matrix on XMM registers.
-	104		movdqu first_row, [src]
-	105		movdqu second_row, [src+src_row_size]
-	106		movdqu third_row, [src+src_row_size*2]
-	107		movdqu fourth_row, [src+fourth_row_offset]
-  \end{verbatim}
-\end{codesnippet}
+\subsubsection{Fusión}
 
-\begin{center}
-  \begin{tabular}{|c || c || c || c |}
-  \hline
-  $row1[0]$ & $row1[1]$ & $row1[2]$ & $row1[3]$ \\ \hline
-  \end{tabular}
-  \\ \textbf{XMM0 $\gets$ row1}
-\end{center}
-\begin{center}
-  \begin{tabular}{|c || c || c || c |}
-  \hline
-  $row2[0]$ & $row2[1]$ & $row2[2]$ & $row2[3]$ \\ \hline
-  \end{tabular}
-  \\ \textbf{XMM1 $\gets$ row2}
-\end{center}
-\begin{center}
-  \begin{tabular}{|c || c || c || c |}
-  \hline
-  $row3[0]$ & $row3[1]$ & $row3[2]$ & $row3[3]$ \\ \hline
-  \end{tabular}
-  \\ \textbf{XMM2 $\gets$ row3}
-\end{center}
-\begin{center}
-  \begin{tabular}{|c || c || c || c |}
-  \hline
-  $row4[0]$ & $row4[1]$ & $row4[2]$ & $row4[3]$ \\ \hline
-  \end{tabular}
-  \\ \textbf{XMM3 $\gets$ row4}
-\end{center}
+Como dijimos cada thread cuenta con tres mutex para administrar tanto la solicitud como la entrada de fusiones. En cada ciclo los threads van a chequear si tienen funciones entrantes haciendo trylock de su mutex fusion$\textunderscore$req. Mientras no puedan tomarlo implica que otro thread esta esperando para fusionarse. De ser así hace un unlock de su fusion$\textunderscore$ack despertando al thread solicitante y un lock de fusion$\textunderscore$ready. Esto ultimo es para esperar a que el otro thread termine de fusionarse. Una vez que ya no tiene pendientes procede a buscar al próximo nodo. En caso de que pertenezca a otro thread solicita una fusión de la siguiente forma: Primero chequea que no tenga funciones entrantes haciendo un trylock de su fusion$\textunderscore$req. Esto lo hacemos para evitar deadlock. Luego lo mismo pero con el fusion$\textunderscore$req del thread dueño del nodo que quiere conseguir. Si puede conseguirlo hace lock del fusion$\textunderscore$ack del otro thread quedando así en espera hasta que el mismo este preparado para realizar la fusión. Una vez que la misma se produce se vuelve a chequear al dueño del nodo ya que podría haber ocurrido una fusión y por lo tanto no ser el mismo. Si se mantuvo se debe chequear cual es el de menor id que será el que "sobreviva". El otro sera reiniciado y comenzará de cero. El sobreviviente tendrá ahora la unión de los agm y las colas de prioridad. Por ultimo ambos fusion$\textunderscore$req serán desbloqueados y así como el fusion$\textunderscore$ready del perdedor. Es importante remarcar que el thread reiniciado mantiene el estado de sus mutex ya que sino podría ocurrir que algún thread quede colgado esperando fusionarse. Si no hubiera sido posible conseguir alguno de los fusion$\textunderscore$req o el dueño del nodo hubiera cambiado el thread habría vuelto al principio del ciclo.
 
-\begin{itemize}
-\item Una vez que el algoritmo carga la matriz en los registros XMM0-XMM3, aplica el algoritmo para hallar el máximo. Este se encontrara en la parte baja del registro XMM4, y se copia a memoria en la imagen de destino.
-\end{itemize}
+\subsection{Algoritmo}
+\begin{algorithm}
+\begin{algorithmic}
+\caption{mstParaleloThread}
+\Function{mstParaleloThread}{grafo}
 
-\begin{codesnippet}
-  \begin{verbatim}
-	;Find maximums and store in the vector_maximum register.
-	110		jmp .hallarMaximos
+\STATE $my$\textunderscore$id \gets thread$\textunderscore$counter++ $
+\STATE $eje$\textunderscore$actual$
+\STATE $my$\textunderscore$data \gets threadData[my$\textunderscore$id]$
+\WHILE{$true$}
+\STATE $thread$\textunderscore$attend$\textunderscore$fusion$\textunderscore$requests(my$\textunderscore$id)$
+\STATE $my$\textunderscore$data.fusion$\textunderscore$req.unlock()$
+\STATE $status \gets buscarNodo(my$\textunderscore$id,ejeActual)$
+\IF{($status = noHayNodosDisponibles$)}
+\STATE $thread$\textunderscore$attend$\textunderscore$fusion$\textunderscore$requests(my$\textunderscore$id)$
+\ENDIF
+\IF{($status = agmCompleto$)}
+\STATE $break$
+\ENDIF
+\STATE $owner$\textunderscore$id \gets colores.capturarNodo(ejeActual.nodoDestino,my$\textunderscore$id)$
+\IF{($my$\textunderscore$id = owner$\textunderscore$id$)}
+\STATE $my$\textunderscore$data.insertarEje(ejeActual)$
+\STATE $my$\textunderscore$data.agregarEjesVecinos(g,ejeActual.nodoDestino)$
+\ELSE 
+\STATE $owner$\textunderscore$data \gets threadData[owner$\textunderscore$id]$
+\IF{($my$\textunderscore$data.fusion$\textunderscore$req.trylock() \neq 0 )$}
+\STATE $continue$
+\ENDIF
+\IF{($owner$\textunderscore$data.fusion$\textunderscore$req.trylock() \neq 0$)}
+\STATE $my$\textunderscore$data.fusion$\textunderscore$req.unlock()$
+\STATE $continue$
+\ENDIF
+\STATE $owner$\textunderscore$data.fusion$\textunderscore$ack.lock()$
+\IF{($colores.esDueño(ejeActual,owner$\textunderscore$id)$)}
+\STATE $my$\textunderscore$data.agm.insertarEje(ejeActual)$
+\IF{($my$\textunderscore$id < owner$\textunderscore$id $)}
+\STATE $fuse(my$\textunderscore$id,owner$\textunderscore$id)$
+\ELSE
+\STATE $fuse(owner$\textunderscore$id,my$\textunderscore$id)$
+\ENDIF
+\ENDIF
+\ENDIF
+\STATE $owner$\textunderscore$id.fusion$\textunderscore$req.unlock()$
+\STATE $my$\textunderscore$id.fusion$\textunderscore$req.unlock()$
+\STATE $owner$\textunderscore$id.fusion$\textunderscore$ready.unlock()$
+\ENDWHILE
+\end{algorithmic}
+\end{algorithm}
 
-	112		.retornarDeMaximos:
-			;Save maximums on the destination image.
-	114		movss [dst], vector_maximum
-  \end{verbatim}
-\end{codesnippet}
 
-\begin{itemize}
-\item Al final de estas cuatro comparaciones, el vector maximum tendrá en cada píxel, el máximo de su correspondiente columna.
-\end{itemize}
-
-\begin{codesnippet}
-  \begin{verbatim}
-			;Algorithm for finding maximums:
-	137		.hallarMaximos:
-	138		pxor vector_maximum, vector_maximum
-
-			;Find maximum comparing row by row on each column.
-	141		pmaxub vector_maximum, first_row
-	142		pmaxub vector_maximum, second_row
-	143		pmaxub vector_maximum, third_row
-	144		pmaxub vector_maximum, fourth_row
-  \end{verbatim}
-\end{codesnippet}
-
-\begin{center}
-  \begin{tabular}{|c || c || c || c |}
-  \hline
-  $max(Column1)$ & $max(Column2)$ & $max(Column3)$ & $max(Column4)$ \\ \hline
-  \end{tabular}
-  \\ \textbf{vector_maximum (XMM4)}
-\end{center}
+\newpage
+Aclaraciones:
 
 \begin{itemize}
-\item Se rota el vector de máximos 3 veces y se hacen tres comparaciones, para obtener el máximo general de la matriz:
-\end{itemize}
-
-\begin{codesnippet}
-  \begin{verbatim}
-	146		movdqu rotated_vector_maximum, vector_maximum
-
-	;Rotate vector one píxel to the right and compare.
-	;Repeat four times to find the maximum among all píxels in the vector.
-	150		pshufb rotated_vector_maximum, mask
-	151		pmaxub vector_maximum, rotated_vector_maximum
-	152		pshufb rotated_vector_maximum, mask
-	153		pmaxub vector_maximum, rotated_vector_maximum
-	154		pshufb rotated_vector_maximum, mask
-	155		pmaxub vector_maximum, rotated_vector_maximum
-	156		jmp .retornarDeMaximos
-  \end{verbatim}
-\end{codesnippet}
-
-\begin{center}
-  \begin{tabular}{|c || c || c || c |}
-  \hline
-   $max(Column2)$ & $max(Column3)$ & $max(Column4)$ & $max(Column1)$\\ \hline
-  \end{tabular}
-  \\ \textbf{rotated_vector_maximum (XMM6)}
-\end{center}
-\begin{center}
-    \begin{tabular}{|c || c || c || c |}
-  \hline
-  $...$ & $...$ & $...$ & $max(Column4, Column1)$ \\ \hline
-  \end{tabular}
-  \\ \textbf{vector_maximum (XMM4)}
-\end{center}
-\begin{center}
-  \begin{tabular}{|c || c || c || c |}
-  \hline
-    $max(Column3)$ & $max(Column4)$ & $max(Column1)$ & $max(Column2)$\\ \hline
-  \end{tabular}
-  \\ \textbf{rotated_vector_maximum (XMM6)}
-
-\end{center}
-\begin{center}
-  \begin{tabular}{|c || c || c || c |}
-  \hline
-  $...$ & $...$ & $...$ & $max(Column4, Column1, Column2)$ \\ \hline
-  \end{tabular}
-  \\ \textbf{vector_maximum (XMM4)}
-\end{center}
-\begin{center}
-  \begin{tabular}{|c || c || c || c |}
-  \hline
-  $max(Column4)$ & $max(Column1)$ & $max(Column2)$ & $max(Column3)$ \\ \hline
-  \end{tabular}
-  \\ \textbf{rotated_vector_maximum (XMM6)}
-\end{center}
-\begin{center}
-      \begin{tabular}{|c || c || c || c |}
-  \hline
-  $...$ & $...$ & $...$ & $max$ \\ \hline
-  \end{tabular}
-  \\ \textbf{vector_maximum (XMM4)}
-\end{center}
-
-\begin{itemize}
-\item De la línea 117 a la 134 se obtienen los próximos píxeles a procesar y cómo pasar a la siguiente fila cuando es necesario.
-\item Para terminar, se desarma el stack frame.
+    \item No realizamos copias del threadData en la implementación. Esto es solamente para clarificar el pseudocódigo
 \end{itemize}
