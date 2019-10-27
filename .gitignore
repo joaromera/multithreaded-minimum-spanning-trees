@@ -48,3 +48,7 @@ suyo.txt
 
 # VSCODE
 .vscode/
+
+.venv/
+data/.mypy_cache/
+data/__pycache__/
