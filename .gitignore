@@ -40,6 +40,9 @@ TP1
 *.aux
 *.toc
 *.pdf
+*.fdb_latexmk
+*.fls
+*.synctex.gz
 
 # Logs
 log.txt
