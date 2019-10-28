@@ -18,13 +18,14 @@ void resetExperimentacion()
     thread_counter = 0;
     fusion_counter = 0;
     idle_counter = 0;
+    intentos = 0;
 }
 
 // Procedimiento para realizar las pruebas o test mínimo de la cátedra
 void experimentacion() {
     imprimirResultado = false;
     ofstream outfile;
-    outfile.open("file.csv", std::ofstream::out | std::ofstream::trunc);
+    outfile.open("experimentacion.csv", std::ofstream::out | std::ofstream::trunc);
     outfile << "instancia,n,grafo,threads, tiempo" << endl;
     int instancia = 0;
     string grafo;
@@ -137,6 +138,240 @@ void experimentacion() {
     outfile.close();
 }
 
+// Procedimiento para realizar las pruebas de fusiones
+void experimentacion_fusiones() {
+    imprimirResultado = false;
+    ofstream outfile;
+    outfile.open("fusiones.csv", std::ofstream::out | std::ofstream::trunc);
+    outfile << "instancia,n,grafo,threads,fusiones" << endl;
+    int instancia = 0;
+    string grafo;
+
+    for (int n = 100; n <= 1000; n += 100) {
+        for (int k = 0; k <= 2; k++) {
+            Grafo g;
+            if (k == 0) {
+                if (g.inicializar("test/experimentacion/arbol/arbol" + to_string(n) +".txt") != 1) {
+                    cerr << "No se pudo cargar el grafo correctamente" << endl;
+                    return;
+                }
+            }
+            if (k == 1) {
+                if (g.inicializar("test/experimentacion/ralo/ralo" + to_string(n) + ".txt") != 1) {
+                    cerr << "No se pudo cargar el grafo correctamente" << endl;
+                    return;
+                }
+            }
+            if (k == 2) {
+                if (g.inicializar("test/experimentacion/completo/completo" + to_string(n) + ".txt") != 1) {
+                    cerr << "No se pudo cargar el grafo correctamente" << endl;
+                    return;
+                }
+            }
+
+            for (int i = 0; i < 10; i++) {
+                if (k == 0) {
+                    grafo = "arbol";
+                    auto start = std::chrono::steady_clock::now();
+                    mstParalelo(&g, 1);
+                    auto end = std::chrono::steady_clock::now();
+
+                    outfile << instancia << "," << n << "," << grafo << "," << 1 << ","
+                            << fusion_counter
+                            << std::endl;
+                    instancia++;
+                    resetExperimentacion();
+                }
+
+                if (k == 1) {
+                    grafo = "ralo";
+                    auto start = std::chrono::steady_clock::now();
+                    mstParalelo(&g, 1);
+                    auto end = std::chrono::steady_clock::now();
+
+                    outfile << instancia << "," << n << "," << grafo << "," << 1 << ","
+                            << fusion_counter
+                            << std::endl;
+                    instancia++;
+                    resetExperimentacion();
+                }
+
+                if (k == 2) {
+                    grafo = "completo";
+                    auto start = std::chrono::steady_clock::now();
+                    mstParalelo(&g, 1);
+                    auto end = std::chrono::steady_clock::now();
+
+                    outfile << instancia << "," << n << "," << grafo << "," << 1 << ","
+                            << fusion_counter
+                            << std::endl;
+                    instancia++;
+                    resetExperimentacion();
+                }
+
+                for (int threads = 2; threads <= 128; threads *= 2) {
+                    if (k == 0) {
+                        grafo = "arbol";
+                        auto start = std::chrono::steady_clock::now();
+                        mstParalelo(&g, threads);
+                        auto end = std::chrono::steady_clock::now();
+
+                        outfile << instancia << "," << n << "," << grafo << "," << threads << ","
+                                << fusion_counter
+                                << std::endl;
+                        instancia++;
+                        resetExperimentacion();
+                    }
+
+                    if (k == 1) {
+                        grafo = "ralo";
+                        auto start = std::chrono::steady_clock::now();
+                        mstParalelo(&g, threads);
+                        auto end = std::chrono::steady_clock::now();
+
+                        outfile << instancia << "," << n << "," << grafo << "," << threads << ","
+                                << fusion_counter
+                                << std::endl;
+                        instancia++;
+                        resetExperimentacion();
+                    }
+
+                    if (k == 2) {
+                        grafo = "completo";
+                        auto start = std::chrono::steady_clock::now();
+                        mstParalelo(&g, threads);
+                        auto end = std::chrono::steady_clock::now();
+
+                        outfile << instancia << "," << n << "," << grafo << "," << threads << ","
+                                << fusion_counter
+                                << std::endl;
+                        instancia++;
+                        resetExperimentacion();
+                    }
+                }
+            }
+        }
+    }
+    outfile.close();
+}
+
+// Procedimiento para realizar las pruebas de intentos de fusiones
+void experimentacion_intentos_fusiones() {
+    imprimirResultado = false;
+    ofstream outfile;
+    outfile.open("intentos_fusiones.csv", std::ofstream::out | std::ofstream::trunc);
+    outfile << "instancia,n,grafo,threads,fusiones" << endl;
+    int instancia = 0;
+    string grafo;
+
+    for (int n = 100; n <= 1000; n += 100) {
+        for (int k = 0; k <= 2; k++) {
+            Grafo g;
+            if (k == 0) {
+                if (g.inicializar("test/experimentacion/arbol/arbol" + to_string(n) +".txt") != 1) {
+                    cerr << "No se pudo cargar el grafo correctamente" << endl;
+                    return;
+                }
+            }
+            if (k == 1) {
+                if (g.inicializar("test/experimentacion/ralo/ralo" + to_string(n) + ".txt") != 1) {
+                    cerr << "No se pudo cargar el grafo correctamente" << endl;
+                    return;
+                }
+            }
+            if (k == 2) {
+                if (g.inicializar("test/experimentacion/completo/completo" + to_string(n) + ".txt") != 1) {
+                    cerr << "No se pudo cargar el grafo correctamente" << endl;
+                    return;
+                }
+            }
+
+            for (int i = 0; i < 10; i++) {
+                if (k == 0) {
+                    grafo = "arbol";
+                    auto start = std::chrono::steady_clock::now();
+                    mstParalelo(&g, 1);
+                    auto end = std::chrono::steady_clock::now();
+
+                    outfile << instancia << "," << n << "," << grafo << "," << 1 << ","
+                            << intentos
+                            << std::endl;
+                    instancia++;
+                    resetExperimentacion();
+                }
+
+                if (k == 1) {
+                    grafo = "ralo";
+                    auto start = std::chrono::steady_clock::now();
+                    mstParalelo(&g, 1);
+                    auto end = std::chrono::steady_clock::now();
+
+                    outfile << instancia << "," << n << "," << grafo << "," << 1 << ","
+                            << intentos
+                            << std::endl;
+                    instancia++;
+                    resetExperimentacion();
+                }
+
+                if (k == 2) {
+                    grafo = "completo";
+                    auto start = std::chrono::steady_clock::now();
+                    mstParalelo(&g, 1);
+                    auto end = std::chrono::steady_clock::now();
+
+                    outfile << instancia << "," << n << "," << grafo << "," << 1 << ","
+                            << intentos
+                            << std::endl;
+                    instancia++;
+                    resetExperimentacion();
+                }
+
+                for (int threads = 2; threads <= 128; threads *= 2) {
+                    if (k == 0) {
+                        grafo = "arbol";
+                        auto start = std::chrono::steady_clock::now();
+                        mstParalelo(&g, threads);
+                        auto end = std::chrono::steady_clock::now();
+
+                        outfile << instancia << "," << n << "," << grafo << "," << threads << ","
+                                << intentos
+                                << std::endl;
+                        instancia++;
+                        resetExperimentacion();
+                    }
+
+                    if (k == 1) {
+                        grafo = "ralo";
+                        auto start = std::chrono::steady_clock::now();
+                        mstParalelo(&g, threads);
+                        auto end = std::chrono::steady_clock::now();
+
+                        outfile << instancia << "," << n << "," << grafo << "," << threads << ","
+                                << intentos
+                                << std::endl;
+                        instancia++;
+                        resetExperimentacion();
+                    }
+
+                    if (k == 2) {
+                        grafo = "completo";
+                        auto start = std::chrono::steady_clock::now();
+                        mstParalelo(&g, threads);
+                        auto end = std::chrono::steady_clock::now();
+
+                        outfile << instancia << "," << n << "," << grafo << "," << threads << ","
+                                << intentos
+                                << std::endl;
+                        instancia++;
+                        resetExperimentacion();
+                    }
+                }
+            }
+        }
+    }
+    outfile.close();
+}
+
 void experimentacion_fusion_time() {
     imprimirResultado = false;
     ofstream outfile;
@@ -207,7 +442,7 @@ void experimentacion_fusion_time() {
                     resetExperimentacion();
                 }
 
-                for (int threads = 2; threads <= 128; threads *= 2) {
+                for (int threads = 2; threads <= 32; threads *= 2) {
                     if (k == 0) {
                         grafo = "arbol";
                         auto start = std::chrono::steady_clock::now();
@@ -242,66 +477,6 @@ void experimentacion_fusion_time() {
                         float diff = (end - start).count();
                         outfile << instancia << "," << n << "," << grafo << "," << threads << ","
                                 << (float) idle_counter / threads / diff
-                                << std::endl;
-                        instancia++;
-                        resetExperimentacion();
-                    }
-                }
-            }
-        }
-    }
-    outfile.close();
-}
-
-// Procedimiento para realizar experimento de cantidad de fusiones
-void experimentacion_fusiones() {
-    imprimirResultado = false;
-    ofstream outfile;
-    outfile.open("fusiones.csv", std::ofstream::out | std::ofstream::trunc);
-    outfile << "instancia,n,grafo,threads,fusiones,tiempo" << endl;
-    int instancia = 0;
-    string grafo;
-
-    for (int n = 0; n < 100; n++) {
-        for (int k = 0; k <= 2; k++) {
-            Grafo g;
-            if (k == 0) {
-                if (g.inicializar("test/experimentacion/fusiones/arbol" + to_string(n) +".txt") != 1) {
-                    cerr << "No se pudo cargar el grafo correctamente" << endl;
-                    return;
-                }
-            }
-            if (k == 1) {
-                if (g.inicializar("test/experimentacion/fusiones/completo" + to_string(n) + ".txt") != 1)
-                {
-                    cerr << "No se pudo cargar el grafo correctamente" << endl;
-                    return;
-                }
-            }
-
-            for (int i = 0; i < 10; i++) {
-                for (int threads = 1; threads <= 40; threads++) {
-                    if (k == 0) {
-                        grafo = "arbol";
-                        auto start = std::chrono::steady_clock::now();
-                        mstParalelo(&g, threads);
-                        auto end = std::chrono::steady_clock::now();
-
-                        outfile << instancia << "," << n << "," << grafo << "," << threads << "," << fusion_counter << ","
-                                << std::chrono::duration <double, std::milli> (end-start).count()
-                                << std::endl;
-                        instancia++;
-                        resetExperimentacion();
-                    }
-
-                    if (k == 1) {
-                        grafo = "completo";
-                        auto start = std::chrono::steady_clock::now();
-                        mstParalelo(&g, threads);
-                        auto end = std::chrono::steady_clock::now();
-
-                        outfile << instancia << "," << n << "," << grafo << "," << threads << "," << fusion_counter << ","
-                                << std::chrono::duration <double, std::milli> (end-start).count()
                                 << std::endl;
                         instancia++;
                         resetExperimentacion();

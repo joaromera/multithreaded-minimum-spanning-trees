@@ -114,6 +114,7 @@ void* mstParaleloThread(void *p) {
             this_thread.add_ejes_alcanzables(g, eje_actual.nodoDestino);
 
         } else {
+            intentos++;
             auto start = std::chrono::steady_clock::now();
             // Caso contrario será el ID del thread con el que debe fusionarse
             // Se hace un pedido de fusión, primero evito recibir nuevos pedidos
@@ -212,6 +213,11 @@ int main(int argc, char const * argv[]) {
 
     if (string(argv[1]) == "-ef") {
         experimentacion_fusiones();
+        return 0;
+    }
+
+    if (string(argv[1]) == "-efi") {
+        experimentacion_intentos_fusiones();
         return 0;
     }
 

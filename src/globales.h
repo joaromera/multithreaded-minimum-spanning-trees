@@ -17,6 +17,9 @@ atomic<int> thread_counter {0};
 // Contador de fusiones, para experimento
 atomic<int> fusion_counter {0};
 
+// Contador de intentos de fusiones, para experimento
+atomic<int> intentos {0};
+
 // Contador de tiempo para experimento
 atomic<long long> idle_counter {0};
 
