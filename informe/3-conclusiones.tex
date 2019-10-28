@@ -1,1 +1,28 @@
 \section{Conclusiones y trabajo futuro}
+
+A lo largo del trabajo el esfuerzo estuvo concentrado en resolver las 
+dificultades de la programación paralela al solucionar el problema principal 
+de encontrar AGMs. Estas dificultades fueron propias de los algoritmos no 
+secuenciales que comparten datos a través del mismo espacio de memoria. A 
+saber: deadlocks, race conditions, starvations, etc. Una implementación que 
+pueda sortear estas dificultades encontrando correctamente un AGM no garantiza
+ un algoritmo más eficiente que su versión secuencial, muy lejos de eso, apenas
+ es el primer paso para dar una solución correcta con un algoritmo multi-threaded.
+
+El problema de mejorar la performance por medio del paralelismo involucra 
+repensar las estrategias para particionar el problema en unidades más pequeñas 
+que puedan hacer suficiente trabajo para superar el overhead impuesto por la 
+creación y sincronización de múltiples hilos. También es necesario partir con 
+un requerimiento técnico inicial: contar con suficientes cores para que sea 
+posible que varios hilos ejecuten en simultáneo, de manera contraria, la 
+ejecución sería secuencial con la penalidad de cambios de ejecución entre los 
+hilos y la sincronización entre ellos. Al mismo tiempo lograr la contención
+ entre una mayor cantidad de threads ya constituye un contratiempo cuando 
+más hilos quieren acceder a las mismas estructuras de datos.
+
+De todos modos, la experiencia contribuye a un primer acercamiento al trabajo 
+con hilos, pthreads y la programación paralela. Fue alcanzado el objetivo de 
+conseguir un algoritmo que cuya ejecución en paralelo resuelva correctamente 
+el problema establecido, queda como trabajo a futuro reflexionar sobre qué 
+más hace falta para que este tipo de programación sirva para mejorar la 
+performance de un problema determinado.
