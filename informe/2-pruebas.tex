@@ -65,7 +65,7 @@ mediciones de 8, 16 y 32 \textit{threads}, cantidad que supera la cantidad de
 En las figuras~\ref{fig:arboles124}--\ref{fig:completos124} se muestra en
 detalle el comportamiento de nuestra implementación del algoritmo para 1, 2 y 4
 \textit{threads}. Puede verse que el algoritmo tiene mejor rendimiento de forma
-secuencial. Sin embargo para el caso de los árboles, utilizar 4 threads arrojó
+secuencial. Para el caso de los árboles, utilizar 4 threads arrojó
 mejores resultados que 2, aunque esta diferencia no es significativa.
 
 \begin{figure}[h]
@@ -89,7 +89,7 @@ mejores resultados que 2, aunque esta diferencia no es significativa.
 \label{fig:completos124}
 \end{figure}
 
-La perdida de rendimiento puede deberse a una mala elección o implementación
+La pérdida de rendimiento puede deberse a una mala elección o implementación
 del algoritmo y las estructuras que le dan soporte. Al incrementar la 
 cantidad de \textit{threads} se incrementa el tiempo en el que los mismos se
  encuentran intentando fusionarse. Las fusiones en sí involucran copiar los 
@@ -97,4 +97,8 @@ cantidad de \textit{threads} se incrementa el tiempo en el que los mismos se
  que el algoritmo secuencial no tiene que hacer. Por otro lado, la penalización
   de los cambios de contexto, inexistente en el caso secuencial, es cada vez 
   mayor a medida que crece la cantidad de threads.
+  Otra diferencia entre la versión secuencial y la paralela, es que la última 
+  también tiene el overhead de crear, inicializar, detener y sincronizar los 
+  hilos. Si estos hilos hacen poco trabajo en relación al overhead que 
+  requieren es esperable que haya una pérdida de rendimiento.
 % FIXME tirar más hipotesis.
