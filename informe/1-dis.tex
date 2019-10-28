@@ -74,9 +74,50 @@ Ver \textmd{/src/fusiones.h} y \textbf{mstParaleloThread} en \textmd{/src/tp1_gr
 
 \subsection{Algoritmo}
 
+La parte central de nuestro algoritmo se realiza en la función 
+\textbf{mstParaleloThread}. Cada thread al ser creado ejecuta esta función. 
+Previamente las estructuras globales fueron inicializadas. Al comienzo se 
+incrementa el contador de threads y con el mismo se le asigna un \textit{ID} 
+al thread y se recupera la instancia del objeto correspondiente en el vector 
+\textit{threadData} (líneas 1-3). Luego se entra en el ciclo principal en la 
+línea siguiente.
+
+El primer paso del ciclo es verificar las peticiones de fusiones que recibió el 
+thread. Si hay alguna las atiende, luego libera el lock para poder recibir más 
+pedidos (líneas 5 y 6).
+
+Entre las líneas 7 y 13 se busca el nodo alcanzable más cercano, si es la 
+primera iteración se elije el primer nodo libre que se encuentre. La función 
+\textit{buscarNodo} se encarga de esto, su valor de retorno indica, además, 
+el estado del algoritmo en general: si ya no hay nodos disponibles o si el AGM 
+ya fue completado, en cuyo caso termina.
+
+De haber encontrado un nodo intenta capturarlo, esto será posible si no fue 
+previamente capturado por otro thread. El chequeo se hace inmediatamente 
+después, si tiene el \textit{ID} del thread tuvo éxito (líneas 14-18), si no, 
+deberá hacer un pedido de fusión (líneas 19-40).
+
+Si el pedido no tiene éxito vuelve a empezar el ciclo, caso contrario una 
+tiene lugar. Se determina cuál es el thread de menor ID, el mismo absorbe 
+los datos del otro thread y lo reinicia.
+
+Esta lógica se repite hasta que no hay más nodos disponibles.
+
+\subsubsection{Consideraciones}
+
+\begin{itemize}
+    \item Línea 3: No realizamos copias del threadData en la implementación. Esto es solamente para clarificar el pseudocódigo.
+    \item $thread\_attend\_fusion\_requests$ realiza el chequeo de las funciones entrantes como se explica en la sección 2.1.3.
+    \item La idea de \textit{buscarNodo} es que encuentre el próximo nodo a agregar al agm del thread. Si aun no tiene ninguno toma el primero libre que encuentre. Sino al nodo alcanzable cuyo eje es de peso mínimo. Además de devolver un status retorna el eje en ejeActual.
+\end{itemize}
+
+\newpage
+
+\subsubsection{Implementación}
+
 \begin{algorithm}
 \caption{mstParaleloThread}
-\begin{algorithmic}
+\begin{algorithmic}[1]
 
 \STATE $my\_id \gets thread\_counter++ $
 \STATE $eje\_actual$
@@ -121,11 +162,3 @@ Ver \textmd{/src/fusiones.h} y \textbf{mstParaleloThread} en \textmd{/src/tp1_gr
 
 \end{algorithmic}
 \end{algorithm}
-\newpage
-
-Aclaraciones:
-\begin{itemize}
-    \item No realizamos copias del threadData en la implementación. Esto es solamente para clarificar el pseudocódigo.
-    \item $thread\_attend\_fusion\_requests$ realiza el chequeo de las funciones entrantes como se explica en la sección 2.1.3.
-    \item La idea de buscarNodo es que encuentre el próximo nodo a agregar al agm del thread. Si aun no tiene ninguno toma el primero libre que encuentre. Sino al nodo alcanzable cuyo eje es de peso mínimo. Además de devolver un status retorna el eje en ejeActual.
-\end{itemize}
