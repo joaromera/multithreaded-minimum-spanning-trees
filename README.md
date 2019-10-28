@@ -12,4 +12,6 @@ Para compilar y correr el trabajo:
 
 ---
 
-El **main** del programa está en */src/tp1_grafo.cpp*
+El **main** del programa está en */src/tp1_grafo.cpp:192*
+
+Para más información sobre las estructuras utilizadas y los archivos incluídos, referir a: *informe.pdf*.
