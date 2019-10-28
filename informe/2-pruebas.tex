@@ -23,7 +23,8 @@ Los experimentos fueron medidos en un procesador \texttt{Intel (R) Core (TM) i5
 3230M CPU @ 2.60GHz} de 2 \textit{cores} físicos y 4 \textit{cores} lógicos,
 con 3072 KB de cache. En una computadora con 8 GB de memoria principal.
 
-\subsection{Resultados}
+\subsection{Performance}
+\subsubsection{Resultados}
 
 Se pudo observar que para todos los casos el tiempo de ejecución crece con el
 tamaño de la instancia, tanto si su incremento es en cantidad de nodos o en
@@ -100,5 +101,11 @@ cantidad de \textit{threads} se incrementa el tiempo en el que los mismos se
   Otra diferencia entre la versión secuencial y la paralela, es que la última 
   también tiene el overhead de crear, inicializar, detener y sincronizar los 
   hilos. Si estos hilos hacen poco trabajo en relación al overhead que 
-  requieren es esperable que haya una pérdida de rendimiento.
+  requieren es esperable que haya una pérdida de rendimiento. Por último, 
+  volvemos a señalar el hecho de que los peores resultados se obtuvieron 
+  cuando la cantidad de threads seperó al número de cores lógicos de la 
+  computadora donde fueron realizadas las pruebas. Si la cantidad de hilos 
+  supera la cantidad de cores, no se puede lograr el paralelismo para todos 
+  los hilos. La diferencia notable entre los resultados para menos de 4 threads
+   y para el resto, respaldan este punto.
 % FIXME tirar más hipotesis.
