@@ -26,7 +26,8 @@ con 3072 KB de cache. En una computadora con 8 GB de memoria principal.
 \subsection{Resultados}
 
 Se pudo observar que para todos los casos el tiempo de ejecución crece con el
-tamaño de la instancia.
+tamaño de la instancia, tanto si su incremento es en cantidad de nodos o en
+cantidad de ejes.
 % Performance variando #threads
 Para todas las instancias obtuvimos una mejor
 \textit{performance} al ejecutar de forma secuencial, que al ejecutar más de un
@@ -64,7 +65,8 @@ mediciones de 8, 16 y 32 \textit{threads}, cantidad que supera la cantidad de
 En las figuras~\ref{fig:arboles124}--\ref{fig:completos124} se muestra en
 detalle el comportamiento de nuestra implementación del algoritmo para 1, 2 y 4
 \textit{threads}. Puede verse que el algoritmo tiene mejor rendimiento de forma
-secuencial.
+secuencial. Sin embargo para el caso de los árboles, utilizar 4 threads arrojó
+mejores resultados que 2, aunque esta diferencia no es significativa.
 
 \begin{figure}[h]
 \caption{Mediciones para árboles con hasta 4 \textit{threads}.}
@@ -87,8 +89,12 @@ secuencial.
 \label{fig:completos124}
 \end{figure}
 
-La perdida de rendimiento puede deberse a una mala elección del algoritmo y las
-estructuras que le dan soporte. Al incrementar la cantidad de \textit{threads}
-se incrementa el tiempo en el que los mismos se encuentran intentando
-fusionarse.
+La perdida de rendimiento puede deberse a una mala elección o implementación
+del algoritmo y las estructuras que le dan soporte. Al incrementar la 
+cantidad de \textit{threads} se incrementa el tiempo en el que los mismos se
+ encuentran intentando fusionarse. Las fusiones en sí involucran copiar los 
+ datos de un thread al otro y reiniciar a uno de ellos. Todas estas son tareas 
+ que el algoritmo secuencial no tiene que hacer. Por otro lado, la penalización
+  de los cambios de contexto, inexistente en el caso secuencial, es cada vez 
+  mayor a medida que crece la cantidad de threads.
 % FIXME tirar más hipotesis.
