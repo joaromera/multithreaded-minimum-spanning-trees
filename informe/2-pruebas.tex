@@ -26,11 +26,14 @@ con 3072 KB de cache. En una computadora con 8 GB de memoria principal.
 \subsection{Performance}
 
 \subsubsection{Análisis Previo}
-La hipótesis que sea plantea para este experimento es que la performance de la implementación en paralelo sea superior al secuencial. Se espera además que al aumentar la cantidad de nodos, la diferencia del tiempo de ejecución entre los algoritmos sea cada vez mayor hasta una cierta cantidad de threads.
+La hipótesis que sea plantea para este experimento es que la performance de la 
+implementación en paralelo sea superior al secuencial. Se espera además que al 
+aumentar la cantidad de nodos, la diferencia del tiempo de ejecución entre los 
+algoritmos sea cada vez mayor hasta una cierta cantidad de threads.
 
 \subsubsection{Resultados}
-A partir del resultado obtenido se puede afirmar que la hipótesis planteada no se corresponde
-con el resultado empírico obtenido.
+A partir del resultado obtenido se puede afirmar que la hipótesis planteada no 
+se corresponde con el resultado empírico obtenido.
 Se pudo observar que para todos los casos el tiempo de ejecución crece con el
 tamaño de la instancia, tanto si su incremento es en cantidad de nodos o en
 cantidad de ejes.
@@ -44,56 +47,12 @@ Puede verse que la degradación de la \textit{performance} se acentúa para las
 mediciones de 8, 16 y 32 \textit{threads}, cantidad que supera la cantidad de
 \textit{cores} lógicos del CPU donde fueron realizadas las mediciones.
 
-\begin{figure}[h]
-\caption{Mediciones para árboles.}
-\centering
-\includegraphics[width=0.5\textwidth]{imagenes/arbol.png} \\%
-\label{fig:arboles}
-\end{figure}
-
-\begin{figure}[h]
-\caption{Mediciones para grafos ralos.}
-\centering
-\includegraphics[width=0.5\textwidth]{imagenes/ralo.png} \\%
-\label{fig:ralos}
-\end{figure}
-
-\begin{figure}[h]
-\caption{Mediciones para grafos completos.}
-\centering
-\includegraphics[width=0.5\textwidth]{imagenes/completo.png} \\%
-\label{fig:completos}
-\end{figure}
-
-%%%%
-
 % Acá hablo de los casos para 1,2,4 threads:
 En las figuras~\ref{fig:arboles124}--\ref{fig:completos124} se muestra en
 detalle el comportamiento de nuestra implementación del algoritmo para 1, 2 y 4
 \textit{threads}. Puede verse que el algoritmo tiene mejor rendimiento de forma
 secuencial. Para el caso de los árboles, utilizar 4 threads arrojó
 mejores resultados que 2, aunque esta diferencia no es significativa.
-
-\begin{figure}[h]
-\caption{Mediciones para árboles con hasta 4 \textit{threads}.}
-\centering
-\includegraphics[width=0.5\textwidth]{imagenes/arbol-124.png} \\%
-\label{fig:arboles124}
-\end{figure}
-
-\begin{figure}[h]
-\caption{Mediciones para grafos ralos con hasta 4 \textit{threads}.}
-\centering
-\includegraphics[width=0.5\textwidth]{imagenes/ralo-124.png} \\%
-\label{fig:ralos124}
-\end{figure}
-
-\begin{figure}[h]
-\caption{Mediciones para grafos completos con hasta 4 \textit{threads}.}
-\centering
-\includegraphics[width=0.5\textwidth]{imagenes/completo-124.png} \\%
-\label{fig:completos124}
-\end{figure}
 
 La pérdida de rendimiento puede deberse a una mala elección o implementación
 del algoritmo y las estructuras que le dan soporte. Al incrementar la 
@@ -114,3 +73,139 @@ cantidad de \textit{threads} se incrementa el tiempo en el que los mismos se
   los hilos. La diferencia notable entre los resultados para menos de 4 threads
    y para el resto, respaldan este punto.
 % FIXME tirar más hipotesis.
+
+\newpage
+
+\begin{figure}[h]
+\caption{Mediciones para árboles.}
+\centering
+\includegraphics[width=0.4\textwidth]{imagenes/arbol.png} \\%
+\label{fig:arboles}
+\end{figure}
+
+\begin{figure}[h]
+\caption{Mediciones para grafos ralos.}
+\centering
+\includegraphics[width=0.4\textwidth]{imagenes/ralo.png} \\%
+\label{fig:ralos}
+\end{figure}
+
+\begin{figure}[h]
+\caption{Mediciones para grafos completos.}
+\centering
+\includegraphics[width=0.4\textwidth]{imagenes/completo.png} \\%
+\label{fig:completos}
+\end{figure}
+
+\newpage
+
+\begin{figure}[h]
+\caption{Mediciones para árboles con hasta 4 \textit{threads}.}
+\centering
+\includegraphics[width=0.4\textwidth]{imagenes/arbol-124.png} \\
+\label{fig:arboles124}
+\end{figure}
+
+\begin{figure}[h]
+\caption{Mediciones para grafos ralos con hasta 4 \textit{threads}.}
+\centering
+\includegraphics[width=0.4\textwidth]{imagenes/ralo-124.png} 
+\label{fig:ralos124}
+\end{figure}
+
+\begin{figure}[h]
+\caption{Mediciones para grafos completos con hasta 4 \textit{threads}.}
+\centering
+\includegraphics[width=0.4\textwidth]{imagenes/completo-124.png} \\
+\label{fig:completos124}
+\end{figure}
+
+\newpage
+
+\subsection{Fusiones}
+
+\subsubsection{Análisis Previo}
+
+Decidimos realizar algunas pruebas extras para los casos que menos se alejaban 
+del algoritmo secuencial: o sea para los casos de 2 y 4 threads. Las pruebas 
+que realizamos consistía en analizar la cantidad de intentos de fusiones y de 
+fusiones efectivas para los distintos tipos de grafos (árboles, ralos y 
+completos), con los distintos tamaños posibles (cantidad de nodos). La 
+hipótesis es que a mayor cantidad de threads, más intentos de fusionarse 
+deberíamos ver, y que este incremento también debería reflejarse en los casos 
+de más nodos y más ejes.
+
+Para realizar este experimento utilizamos un contador atómico global, al 
+momento de realizar una fusión es incrementado. Usamos el mismo framework 
+provisto por la cátedra con una leve modificación para imprimir este contador 
+en vez del tiempo promedio. A su vez se hicieron múltiples iteraciones y se 
+calculó número de fusiones promedio para graficar. Los resultados están en 
+las figuras \ref{fig:fusionesarboles} a \ref{fig:fusionescompletos}.
+
+A su vez, hicimos lo mismo para contar los intentos de fusiones, esto es, 
+un contador atómico compartido por todos los hilos, que lleva la cuenta de 
+la cantidad de veces que un hilo encontró que el próximo nodo a agregar había 
+sido capturado por otro. Dada la naturaleza de nuestro algoritmo, este caso no 
+implica necesariamente una fusión, ya que para que sea exitosa tiene que poder 
+hacerse con los locks pertinentes. Los resultados están en 
+las figuras \ref{fig:intentos2threads} y \ref{fig:intentos4threads}.
+
+\subsubsection{Resultados}
+
+Las observaciones respaldan la hipótesis como puede apreciarse en los gráficos.
+ Es evidente que mientras más threads hay más fusiones hay que realizar. Se 
+puede observar que el número de fusiones no crece con el mismo grado que el tamaño 
+del grafo, aunque para los árboles, la cantidad de fusiones registrada fue, 
+en promedio, mucho menor. Esto en parte también explica que los árboles sean 
+los grafos que se resuelven en la menor cantidad de tiempo.
+
+En cuanto a los intentos de fusión observamos que los árboles son los que menos 
+intentos realizan, lo cual se relaciona con que también tengan el menor número 
+de fusiones. Sin embargo, para ralos y completos quién realiza más intentos 
+fue dependiente de la cantidad de threads. El hecho sobresaliente de esta 
+experimentación es la diferencia en el número de intentos de fusiones entre 
+las versiones de 2 y 4 threads. La diferencia es de 4 órdenes de magnitud, 
+mientras que para las fusiones que efectivamente se realizan no hay ni un 
+órden de magnitud entre 2 y 4 threads. Esto nos da un indicio de que la estrategia
+ utilizada en nuestro algoritmo desperdicia muchos recursos en intentar lograr 
+una fusión, lográndolo en una pequeña fracción de los intentos, especialmente 
+a medida de que se suman threads.
+
+\newpage
+
+\begin{figure}[h]
+   \centering
+   \caption{Fusiones para árboles con hasta 4 \textit{threads}.}
+   \includegraphics[width=0.45\textwidth]{imagenes/fusiones-arboles.png}
+   \label{fig:fusionesarboles}
+\end{figure}
+
+\begin{figure}[h]
+   \centering
+   \caption{Fusiones para grafos ralos con hasta 4 \textit{threads}.}
+   \includegraphics[width=0.45\textwidth]{imagenes/fusiones-ralos.png}
+   \label{fig:fusionesralos}
+\end{figure}
+
+\begin{figure}[h]
+   \centering
+   \caption{Fusiones para grafos completos con hasta 4 \textit{threads}.}
+   \includegraphics[width=0.45\textwidth]{imagenes/fusiones-completos.png}
+   \label{fig:fusionescompletos}
+\end{figure}
+
+\newpage
+
+\begin{figure}[h]
+   \centering
+   \caption{Intentos de fusiones para 2 \textit{threads}.}
+   \includegraphics[width=0.5\textwidth]{imagenes/intentos-fusiones-2-threads.png}
+   \label{fig:intentos2threads}
+\end{figure}
+
+\begin{figure}[h]
+   \centering
+   \caption{Intentos de fusiones para 4 \textit{threads}.}
+   \includegraphics[width=0.5\textwidth]{imagenes/intentos-fusiones-4-threads.png}
+   \label{fig:intentos4threads}
+\end{figure}
