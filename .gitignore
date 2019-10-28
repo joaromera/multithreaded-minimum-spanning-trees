@@ -51,3 +51,6 @@ suyo.txt
 
 # VSCODE
 .vscode/
+
+# macOS
+.DS_Store
