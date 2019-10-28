@@ -75,52 +75,52 @@ Ver \textmd{/src/fusiones.h} y \textbf{mstParaleloThread} en \textmd{/src/tp1_gr
 \subsection{Algoritmo}
 
 \begin{algorithm}
-    \begin{algorithmic}
-        \caption{mstParaleloThread}
-        \Function{mstParalelothread}{grafo}
-            \STATE $my\_id \gets thread\_counter++ $
-            \STATE $eje\_actual$
-            \STATE $my\_data \gets threadData[my\_id]$
-            \WHILE{$true$}
-                \STATE $thread\_attend\_fusion\_requests(my\_id)$
-                \STATE $my\_data.fusion\_req.unlock()$
-                \STATE $status \gets buscarNodo(my\_id,ejeActual)$
-                \IF{($status = noHayNodosDisponibles$)}
-                    \STATE $thread\_attend\_fusion\_requests(my\_id)$
-                \ENDIF
-                \IF{($status = agmCompleto$)}
-                    \STATE $break$
-                \ENDIF
-                \STATE $owner\_id \gets colores.capturarNodo(ejeActual.nodoDestino,my$\textunderscore$id)$
-                \IF{($my\_id = owner\_id$)}
-                    \STATE $my\_data.insertarEje(ejeActual)$
-                    \STATE $my\_data.agregarEjesVecinos(g,ejeActual.nodoDestino)$
-                \ELSE 
-                    \STATE $owner\_data \gets threadData[owner\_id]$
-                    \IF{($my\_data.fusion\_req.trylock() \neq 0 )$}
-                        \STATE $continue$
-                    \ENDIF
-                    \IF{($owner\_data.fusion\_req.trylock() \neq 0$)}
-                        \STATE $my\_data.fusion\_req.unlock()$
-                        \STATE $continue$
-                    \ENDIF
-                    \STATE $owner\_data.fusion\_ack.lock()$
-                    \IF{($colores.esDueno(ejeActual,owner\_id)$)}
-                        \STATE $my\_data.agm.insertarEje(ejeActual)$
-                        \IF{($my\_id < owner\_id $)}
-                            \STATE $fuse(my\_id,owner\_id)$
-                        \ELSE
-                            \STATE $fuse(owner\_id,my\_id)$
-                        \ENDIF
-                    \ENDIF
-                \ENDIF
-                \STATE $owner\_id.fusion\_req.unlock()$
-                \STATE $my\_id.fusion\_req.unlock()$
-                \STATE $owner\_id.fusion\_ready.unlock()$
-            \ENDWHILE
-    \end{algorithmic}
-\end{algorithm}
+\caption{mstParaleloThread}
+\begin{algorithmic}
 
+\STATE $my\_id \gets thread\_counter++ $
+\STATE $eje\_actual$
+\STATE $my\_data \gets threadData[my\_id]$
+\WHILE{$true$}
+\STATE $thread\_attend\_fusion\_requests(my\_id)$
+\STATE $my\_data.fusion\_req.unlock()$
+\STATE $status \gets buscarNodo(my\_id,ejeActual)$
+\IF{($status = noHayNodosDisponibles$)}
+\STATE $thread\_attend\_fusion\_requests(my\_id)$
+\ENDIF
+\IF{($status = agmCompleto$)}
+\STATE $break$
+\ENDIF
+\STATE $owner\_id \gets colores.capturarNodo(ejeActual.nodoDestino,my$\textunderscore$id)$
+\IF{($my\_id = owner\_id$)}
+\STATE $my\_data.insertarEje(ejeActual)$
+\STATE $my\_data.agregarEjesVecinos(g,ejeActual.nodoDestino)$
+\ELSE 
+\STATE $owner\_data \gets threadData[owner\_id]$
+\IF{($my\_data.fusion\_req.trylock() \neq 0 )$}
+\STATE $continue$
+\ENDIF
+\IF{($owner\_data.fusion\_req.trylock() \neq 0$)}
+\STATE $my\_data.fusion\_req.unlock()$
+\STATE $continue$
+\ENDIF
+\STATE $owner\_data.fusion\_ack.lock()$
+\IF{($colores.esDueno(ejeActual,owner\_id)$)}
+\STATE $my\_data.agm.insertarEje(ejeActual)$
+\IF{($my\_id < owner\_id $)}
+\STATE $fuse(my\_id,owner\_id)$
+\ELSE
+\STATE $fuse(owner\_id,my\_id)$
+\ENDIF
+\ENDIF
+\ENDIF
+\STATE $owner\_id.fusion\_req.unlock()$
+\STATE $my\_id.fusion\_req.unlock()$
+\STATE $owner\_id.fusion\_ready.unlock()$
+\ENDWHILE
+
+\end{algorithmic}
+\end{algorithm}
 \newpage
 
 Aclaraciones:
