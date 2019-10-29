@@ -81,9 +81,6 @@ testSecuencialCompleto1000: TP1
 testSecuencialCompleto2000: TP1
 	./TP1 test/completo2000.txt secuencial
 
-testSecuencialCompleto2000: TP1
-	./TP1 test/completo2000.txt secuencial
-
 testk3: TP1
 	./TP1 test/correctitud/k3.txt paralelo 2
 	./TP1 test/correctitud/k3.txt paralelo 4
