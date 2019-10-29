@@ -4,7 +4,7 @@ En este trabajo se propone una solución para resolver el problema de encontrar 
 
 Nuestra propuesta permite elegir la cantidad de threads que van a encontrar un AGM para un grafo determinado, al momento de ejecución se utiliza una versión paralela del antes mencionado algoritmo de Prim, replicado en tantos hilos como hayan sido elegidos el mismo algoritmo pero iniciando cada uno desde un nodo diferente del mismo grafo.
 
-Los problemas potenciales que pueden existir en esta estrategia surgen cuando más de un thread quiere capturar el mismo nodo, o cuando uno o más threads quiere capturar un nodo perteneciente a otro thread. A estos escenarios se suma la complejidad de resolver ciclos cuando dos threads se quieren fusionar mutuamente, y aquellos relacionados con la naturaleza de la programación asincrónica y distribuida: evitar deadlocks, starvations, race conditions y asegurar la contención. Un esquema simple para resolver estas dificultades fue propuesto utilizando locks y trylocks de la libreria Pthreads.
+Los problemas potenciales que pueden existir en esta estrategia surgen cuando más de un thread quiere capturar el mismo nodo, o cuando uno o más threads quiere capturar un nodo perteneciente a otro thread. A estos escenarios se suma la complejidad de resolver ciclos cuando dos threads se quieren fusionar mutuamente, y aquellos relacionados con la naturaleza de la programación asincrónica y paralela: evitar deadlocks, starvations, race conditions y asegurar la contención. Un esquema simple para resolver estas dificultades fue propuesto utilizando locks y trylocks de la libreria Pthreads.
 
 Se presentan resultados de experimentaciones para analiza el método propuesto.
 

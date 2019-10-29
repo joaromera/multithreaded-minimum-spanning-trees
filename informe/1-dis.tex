@@ -13,13 +13,13 @@ En esta sección damos un detalle de las estructuras que utilizamos para mantene
 
 \subsubsection{Variables globales}
 
-En la memoria compartida por cada proceso se encuentra la información correspondiente a cada thread en \textbf{threadData}, el \textit{ownership} de cada nodo en \textbf{colores}, un contador atómico para identificar los threads durante su inicialización, \textbf{thread_counter} y finalmente un vector de \textit{pthread_t} para coordinar la creación de los threads y para esperar a que los mismos terminen: \textbf{pthread_id}.
+En la memoria compartida por cada proceso se encuentra la información correspondiente a cada thread en \texttt{threadData}, el \textit{ownership} de cada nodo en \texttt{colores}, un contador atómico para identificar los threads durante su inicialización, \texttt{thread_counter} y finalmente un vector de \textit{pthread_t} para coordinar la creación de los threads y para esperar a que los mismos terminen: \texttt{pthread_id}.
 
 Estos objetos se encuentran en: \textmd{/src/globales.h}
 
 \subsubsection{Grafos y Ejes}
 
-Se utilizaron las estructuras facilitadas por la cátedra con leves modificaciones. En el caso de los grafos se agregó un constructor por copia y se sobrecargó el método de \textbf{insertarEje}, también incluyeron: \textbf{insertarNodo} y \textbf{getPeso} para facilitar algunas operaciones.
+Se utilizaron las estructuras facilitadas por la cátedra con leves modificaciones. En el caso de los grafos se agregó un constructor por copia y se sobrecargó el método de \texttt{insertarEje}, también incluyeron: \texttt{insertarNodo} y \texttt{getPeso} para facilitar algunas operaciones.
 
 En el caso de los ejes, se agregó información correspondiente al nodo de origen y un constructor con distintos parámetros.
 
@@ -45,7 +45,7 @@ Ver \textmd{/src/thread.h}
 
 \subsubsection{Cola De Prioridad}
 
-Cada thread tiene una cola de prioridad, \textbf{ejesVecinos}, que mantiene ordenados crecientemente los ejes actualmente alcanzables según su peso. A la hora de buscar el próximo nodo a capturar, siempre se eligirá el primer elemento de la cola. Luego de capturar un nodo, sus ejes son agregados a la misma y el proceso se repite.
+Cada thread tiene una cola de prioridad, \texttt{ejesVecinos}, que mantiene ordenados crecientemente los ejes actualmente alcanzables según su peso. A la hora de buscar el próximo nodo a capturar, siempre se eligirá el primer elemento de la cola. Luego de capturar un nodo, sus ejes son agregados a la misma y el proceso se repite.
 
 Ver \textmd{/src/cola_proridad.h}
 
@@ -58,7 +58,7 @@ Ver \textmd{/src/cola_proridad.h}
     };
 \end{verbatim}
 
-Para controlar que la pertenencia de los nodos del grafo utilizamos esta estructura que contiene un vector con el color de cada uno, los cuales no son otra cosa que los ID de cada thread. Para evitar race conditions y asegurar contención, cada nodo tiene además un mutex asociado el cual nos permite tener acceso exclusivo al mismo. Vamos a distinguir además a los nodos libres con un -1.  Las operaciones principales de la clase son \textbf{esDueño} que nos permite conocer al thread que posee a ese nodo y \textbf{capturarNodo} cuyo objetivo es convertir a un thread en dueño de un nodo. En caso de que esto ultimo no sea posible, porque ya pertenece a otro thread, se procederá a solicitar una fusión. Cuando esta se produzca los nodos del thread de mayor id cambiaran de dueño y pasaran a ser del de menor id.
+Para controlar que la pertenencia de los nodos del grafo utilizamos esta estructura que contiene un vector con el color de cada uno, los cuales no son otra cosa que los ID de cada thread. Para evitar race conditions y asegurar contención, cada nodo tiene además un mutex asociado el cual nos permite tener acceso exclusivo al mismo. Vamos a distinguir además a los nodos libres con un -1.  Las operaciones principales de la clase son \texttt{esDueño} que nos permite conocer al thread que posee a ese nodo y \texttt{capturarNodo} cuyo objetivo es convertir a un thread en dueño de un nodo. En caso de que esto último no sea posible, porque ya pertenece a otro thread, se procederá a solicitar una fusión. Cuando esta se produzca los nodos del thread de mayor id cambiaran de dueño y pasaran a ser del de menor id.
 
 Ver \textmd{/src/colores.h}
 
@@ -68,14 +68,14 @@ Como mencionamos anteriormente, cada thread cuenta con tres mutex para administr
 
 Una vez que ya no tiene pendientes procede a buscar el próximo nodo e intentar capturarlo. En caso de que pertenezca a otro thread solicita una fusión de la siguiente forma: primero chequea que no tenga funciones entrantes haciendo un trylock de su fusion\_req. Esto lo hacemos para evitar un posible deadlock. Luego, lo mismo pero con el fusion\_req del thread dueño del nodo que quiere capturar. Si puede conseguirlo hace lock del fusion\_ack del otro thread quedando así en espera hasta que el mismo esté preparado para realizar la fusión. Una vez que la misma se produce se verifica que el dueño siga siendo el mismo ya que podría haber ocurrido una fusión y por lo tanto haber cambiado. Si se mantuvo se debe chequear cuál es el de menor id, el cual será quien "sobreviva". El otro será reiniciado y comenzará de nuevo con todo el proceso. El sobreviviente tendrá ahora la unión de ambos AGMs y ambas colas de prioridad.
 
-Por ultimo, ambos fusion\_req serán desbloqueados, así como el fusion\_ready del perdedor. Es importante remarcar que el thread reiniciado mantiene el estado de sus mutex ya que, si no, podría ocurrir que algún thread quede esperando fusionarse con él. Si no hubiera sido posible conseguir alguno de los fusion\_req o el dueño del nodo hubiera cambiado el thread habría vuelto al principio de este ciclo.
+Por último, ambos fusion\_req serán desbloqueados, así como el fusion\_ready del perdedor. Es importante remarcar que el thread reiniciado mantiene el estado de sus mutex ya que, si no, podría ocurrir que algún thread quede esperando fusionarse con él. Si no hubiera sido posible conseguir alguno de los fusion\_req o el dueño del nodo hubiera cambiado el thread habría vuelto al principio de este ciclo.
 
-Ver \textmd{/src/fusiones.h} y \textbf{mstParaleloThread} en \textmd{/src/tp1_grafo.cpp}
+Ver \textmd{/src/fusiones.h} y \texttt{mstParaleloThread} en \textmd{/src/tp1_grafo.cpp}
 
 \subsection{Algoritmo}
 
 La parte central de nuestro algoritmo se realiza en la función 
-\textbf{mstParaleloThread}. Cada thread al ser creado ejecuta esta función. 
+\texttt{mstParaleloThread}. Cada thread al ser creado ejecuta esta función. 
 Previamente las estructuras globales fueron inicializadas. Al comienzo se 
 incrementa el contador de threads y con el mismo se le asigna un \textit{ID} 
 al thread y se recupera la instancia del objeto correspondiente en el vector 

@@ -128,7 +128,7 @@ cantidad de \textit{threads} se incrementa el tiempo en el que los mismos se
 
 Decidimos realizar algunas pruebas extras para los casos que menos se alejaban 
 del algoritmo secuencial: o sea para los casos de 2 y 4 threads. Las pruebas 
-que realizamos consistía en analizar la cantidad de intentos de fusiones y de 
+que realizamos consistieron en analizar la cantidad de intentos de fusiones y de 
 fusiones efectivas para los distintos tipos de grafos (árboles, ralos y 
 completos), con los distintos tamaños posibles (cantidad de nodos). La 
 hipótesis es que a mayor cantidad de threads, más intentos de fusionarse 
@@ -138,8 +138,8 @@ de más nodos y más ejes.
 Para realizar este experimento utilizamos un contador atómico global, al 
 momento de realizar una fusión es incrementado. Usamos el mismo framework 
 provisto por la cátedra con una leve modificación para imprimir este contador 
-en vez del tiempo promedio. A su vez se hicieron múltiples iteraciones y se 
-calculó número de fusiones promedio para graficar. Los resultados están en 
+en vez del tiempo promedio. Se hicieron múltiples iteraciones y se 
+calculó el número de fusiones promedio para graficar. Los resultados están en 
 las figuras \ref{fig:fusionesarboles} a \ref{fig:fusionescompletos}.
 
 A su vez, hicimos lo mismo para contar los intentos de fusiones, esto es, 
