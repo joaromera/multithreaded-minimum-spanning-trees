@@ -80,3 +80,24 @@ testSecuencialCompleto1000: TP1
 
 testSecuencialCompleto2000: TP1
 	./TP1 test/completo2000.txt secuencial
+
+testSecuencialCompleto2000: TP1
+	./TP1 test/completo2000.txt secuencial
+
+testk3: TP1
+	./TP1 test/correctitud/k3.txt paralelo 2
+	./TP1 test/correctitud/k3.txt paralelo 4
+	./TP1 test/correctitud/k3.txt paralelo 8
+	./TP1 test/correctitud/k3.txt paralelo 16
+
+testk4: TP1
+	./TP1 test/correctitud/k4.txt paralelo 2
+	./TP1 test/correctitud/k4.txt paralelo 4
+	./TP1 test/correctitud/k4.txt paralelo 8
+	./TP1 test/correctitud/k4.txt paralelo 16
+
+testOtroTest: TP1
+	./TP1 test/correctitud/otro_test.txt paralelo 2
+	./TP1 test/correctitud/otro_test.txt paralelo 4
+	./TP1 test/correctitud/otro_test.txt paralelo 8
+	./TP1 test/correctitud/otro_test.txt paralelo 16
